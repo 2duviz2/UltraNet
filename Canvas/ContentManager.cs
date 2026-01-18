@@ -26,9 +26,31 @@ namespace UltraNet.Canvas
         public GameObject buttonPrefab;
         public GameObject inputFieldPrefab;
 
+        public const string mainUrl = "https://duviz.xyz/static/ultranet/main.pencil";
+        public const string errorJson = @"
+        {
+    'title': 'Error!',
+    'elements': [
+        {
+            'type': 'text',
+            'name': 'WelcomeText',
+            'text': 'There was an error when tryin to load the site. Try again later.',
+            'color': '#FF0000'
+        },
+        {
+            'type': 'button',
+            'name': 'BackButton',
+            'text': 'Go back',
+            'url': 'https://duviz.xyz/static/ultranet/main.pencil',
+            'action': 'load'
+        }
+    ]
+}
+        ";
+
         public void Start()
         {
-            LoadWebsite("https://duviz.xyz/static/ultranet/main.pencil");
+            LoadWebsite(mainUrl);
         }
 
         public void LoadWebsite(string url, bool deletePrev = true)
@@ -39,6 +61,10 @@ namespace UltraNet.Canvas
                 if (json != null)
                 {
                     ParseJson(json);
+                }
+                else
+                {
+                    ParseJson(errorJson);
                 }
             }));
         }
@@ -51,6 +77,10 @@ namespace UltraNet.Canvas
                 if (json != null)
                 {
                     ParseJson(json);
+                }
+                else
+                {
+                    ParseJson(errorJson);
                 }
             }));
         }
@@ -67,6 +97,7 @@ namespace UltraNet.Canvas
             catch (Exception ex)
             {
                 Plugin.LogError($"Failed to parse scene json: {ex}");
+                ParseJson(errorJson);
                 return;
             }
 
