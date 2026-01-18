@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace UltraEditor.Classes.Canvas
+namespace UltraNet.Canvas
 {
     internal class ResetScrollbar : MonoBehaviour
     {

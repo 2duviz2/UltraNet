@@ -11,7 +11,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-namespace UltraNet.canvas
+namespace UltraNet.Canvas
 {
     public class ContentManager : MonoBehaviour
     {
@@ -31,8 +31,9 @@ namespace UltraNet.canvas
             LoadWebsite("https://duviz.xyz/static/ultranet/main.pencil");
         }
 
-        public void LoadWebsite(string url)
+        public void LoadWebsite(string url, bool deletePrev = true)
         {
+            if (deletePrev) CleanUp();
             StartCoroutine(GetStringFromUrl(url, (json) =>
             {
                 if (json != null)
@@ -42,8 +43,9 @@ namespace UltraNet.canvas
             }));
         }
 
-        public void PostWebsite(string url, Dictionary<string, string> postData)
+        public void PostWebsite(string url, Dictionary<string, string> postData,  bool deletePrev = true)
         {
+            if (deletePrev) CleanUp();
             StartCoroutine(PostRequest(url, postData, (json) =>
             {
                 if (json != null)
