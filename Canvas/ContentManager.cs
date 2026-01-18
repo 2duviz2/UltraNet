@@ -34,7 +34,7 @@ namespace UltraNet.Canvas
         {
             'type': 'text',
             'name': 'WelcomeText',
-            'text': 'There was an error when tryin to load the site. Try again later.',
+            'text': 'There was an error when trying to load the site. Try again later.',
             'color': '#FF0000'
         },
         {
