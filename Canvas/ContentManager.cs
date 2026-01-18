@@ -28,24 +28,24 @@ namespace UltraNet.Canvas
 
         public const string mainUrl = "https://duviz.xyz/static/ultranet/main.pencil";
         public const string errorJson = @"
-        {
-    'title': 'Error!',
-    'elements': [
-        {
-            'type': 'text',
-            'name': 'WelcomeText',
-            'text': 'There was an error when trying to load the site. Try again later.',
-            'color': '#FF0000'
-        },
-        {
-            'type': 'button',
-            'name': 'BackButton',
-            'text': 'Go back',
-            'url': 'https://duviz.xyz/static/ultranet/main.pencil',
-            'action': 'load'
-        }
-    ]
-}
+            {
+                'title': 'Error!',
+                'elements': [
+                    {
+                        'type': 'text',
+                        'name': 'ErrorText',
+                        'text': 'There was an error when trying to load the site. Try again later.',
+                        'color': '#FF0000'
+                    },
+                    {
+                        'type': 'button',
+                        'name': 'BackButton',
+                        'text': 'Go back',
+                        'url': 'https://duviz.xyz/static/ultranet/main.pencil',
+                        'action': 'load'
+                    }
+                ]
+            }
         ";
 
         public void Start()
