@@ -106,6 +106,17 @@ namespace UltraNet.Canvas
 
             titleText.text = (root["title"]?.ToString() ?? "Unnamed").ToUpper();
 
+            if (root["cookieKey"] != null)
+            {
+                string cookieKey = root["cookieKey"]?.ToString() ?? "Element";
+                string cookieValue = root["cookieValue"]?.ToString() ?? "Element";
+                PlayerPrefs.SetString(cookieKey, cookieValue);
+            }
+
+            if (root["scrollbar"] != null)
+                resetScrollbar.ResetPos((float)root["scrollbar"]);
+
+
             List<(string, TMP_InputField)> inputFields = [];
             foreach (var element in root["elements"])
             {
@@ -131,16 +142,6 @@ namespace UltraNet.Canvas
                     element["width"] != null ? (float)element["width"] : rectTransform.sizeDelta.x,
                     element["height"] != null ? (float)element["height"] : rectTransform.sizeDelta.y
                 );
-
-                if (element["scrollbar"] != null)
-                    resetScrollbar.ResetPos((float)element["scrollbar"]);
-
-                if (element["cookieKey"] != null)
-                {
-                    string cookieKey = element["cookieKey"]?.ToString() ?? "Element";
-                    string cookieValue = element["cookieValue"]?.ToString() ?? "Element";
-                    PlayerPrefs.SetString(cookieKey, cookieValue);
-                }
 
                 // Set specific properties
                 switch (type)
