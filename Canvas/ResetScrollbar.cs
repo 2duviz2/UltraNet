@@ -3,16 +3,16 @@ using UnityEngine.UI;
 
 namespace UltraNet.Canvas
 {
-    internal class ResetScrollbar : MonoBehaviour
+    public class ResetScrollbar : MonoBehaviour
     {
         public float value = 1;
 
         void Start()
         {
-            ResetPos();
+            ResetPos(value);
         }
 
-        void ResetPos()
+        public void ResetPos(float value)
         {
             GetComponent<Scrollbar>().value = value;
         }

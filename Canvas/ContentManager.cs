@@ -16,6 +16,7 @@ namespace UltraNet.Canvas
     public class ContentManager : MonoBehaviour
     {
         public Transform content;
+        public ResetScrollbar resetScrollbar;
 
         [Header("Root")]
         public TMP_Text titleText;
@@ -55,6 +56,7 @@ namespace UltraNet.Canvas
 
         public void LoadWebsite(string url, bool deletePrev = true)
         {
+            StopAllCoroutines();
             if (deletePrev) CleanUp();
             StartCoroutine(GetStringFromUrl(url, (json) =>
             {
@@ -71,6 +73,7 @@ namespace UltraNet.Canvas
 
         public void PostWebsite(string url, Dictionary<string, string> postData,  bool deletePrev = true)
         {
+            StopAllCoroutines();
             if (deletePrev) CleanUp();
             StartCoroutine(PostRequest(url, postData, (json) =>
             {
@@ -103,7 +106,7 @@ namespace UltraNet.Canvas
 
             titleText.text = (root["title"]?.ToString() ?? "Unnamed").ToUpper();
 
-            List<(string, InputField)> inputFields = [];
+            List<(string, TMP_InputField)> inputFields = [];
             foreach (var element in root["elements"])
             {
                 string type = element["type"]?.ToString();
@@ -122,12 +125,30 @@ namespace UltraNet.Canvas
                 }
                 GameObject obj = Instantiate(prefab, content);
                 obj.name = element["name"]?.ToString() ?? "Element";
+
+                RectTransform rectTransform = obj.GetComponent<RectTransform>();
+                rectTransform.sizeDelta = new Vector2(
+                    element["width"] != null ? (float)element["width"] : rectTransform.sizeDelta.x,
+                    element["height"] != null ? (float)element["height"] : rectTransform.sizeDelta.y
+                );
+
+                if (element["scrollbar"] != null)
+                    resetScrollbar.ResetPos((float)element["scrollbar"]);
+
+                if (element["cookieKey"] != null)
+                {
+                    string cookieKey = element["cookieKey"]?.ToString() ?? "Element";
+                    string cookieValue = element["cookieValue"]?.ToString() ?? "Element";
+                    PlayerPrefs.SetString(cookieKey, cookieValue);
+                }
+
                 // Set specific properties
                 switch (type)
                 {
                     case "text":
                         var textComp = obj.GetComponent<TMP_Text>();
                         if (textComp != null)
+
                         {
                             textComp.text = element["text"]?.ToString() ?? "Text";
                             textComp.color = ParseColor(element["color"]?.ToString());
@@ -162,18 +183,29 @@ namespace UltraNet.Canvas
                                             var inputField = inputFields.FirstOrDefault(f => f.Item1 == inputFieldName).Item2;
                                             if (inputField != null)
                                             {
-                                                PostWebsite(url, new Dictionary<string, string> { { "input", inputField.text } });
+                                                PostWebsite(url, new Dictionary<string, string> { { "input", inputField.text }, { "token", GetToken() }});
+                                            }
+                                            else
+                                            {
+                                                Plugin.LogWarning($"Input field with name '{inputFieldName}' not found for button '{obj.name}'.");
                                             }
                                         }
                                         break;
+                                    case "postToken":
+                                        PostWebsite(url, new Dictionary<string, string> { { "token", GetToken() } });
+                                        break;
+                                    case "open":
+                                        Application.OpenURL(url);
+                                        break;
                                     default:
+                                        Plugin.LogWarning($"Unknown button action: {action}");
                                         break;
                                 }
                             });
                         }
                         break;
                     case "inputField":
-                        var inputFieldComp = obj.GetComponentInChildren<InputField>();
+                        var inputFieldComp = obj.GetComponentInChildren<TMP_InputField>();
                         if (inputFieldComp != null)
                         {
                             inputFieldComp.placeholder.GetComponent<TMP_Text>().text = element["text"]?.ToString() ?? "Enter text...";
@@ -200,6 +232,7 @@ namespace UltraNet.Canvas
             {
                 Destroy(child.gameObject);
             }
+            titleText.text = "LOADING...";
         }
 
         public static IEnumerator GetStringFromUrl(string url, System.Action<string> callback)
@@ -210,7 +243,7 @@ namespace UltraNet.Canvas
 
                 if (www.result != UnityWebRequest.Result.Success)
                 {
-                    Debug.LogError("Failed to load string: " + www.error);
+                    Plugin.LogError("Failed to load string: " + www.error);
                     callback?.Invoke(null);
                 }
                 else
@@ -232,7 +265,7 @@ namespace UltraNet.Canvas
                 yield return www.SendWebRequest();
                 if (www.result != UnityWebRequest.Result.Success)
                 {
-                    Debug.LogError("Failed to post request: " + www.error);
+                    Plugin.LogError("Failed to post request: " + www.error);
                     callback?.Invoke(null);
                 }
                 else
@@ -240,6 +273,11 @@ namespace UltraNet.Canvas
                     callback?.Invoke(www.downloadHandler.text);
                 }
             }
+        }
+
+        public string GetToken()
+        {
+            return PlayerPrefs.GetString("UltranetToken", "");
         }
         #endregion
     }
