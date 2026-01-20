@@ -17,6 +17,7 @@ namespace UltraNet.Canvas
     {
         public Transform content;
         public ResetScrollbar resetScrollbar;
+        public ScrollRect scrollRect;
 
         [Header("Root")]
         public TMP_Text titleText;
@@ -27,7 +28,7 @@ namespace UltraNet.Canvas
         public GameObject buttonPrefab;
         public GameObject inputFieldPrefab;
 
-        public const string mainUrl = "https://duviz.xyz/static/ultranet/main.pencil";
+        public const string mainUrl = "https://duviz.xyz/login";
         public const string errorJson = @"
             {
                 'title': 'Error!',
@@ -42,16 +43,22 @@ namespace UltraNet.Canvas
                         'type': 'button',
                         'name': 'BackButton',
                         'text': 'Go back',
-                        'url': 'https://duviz.xyz/static/ultranet/main.pencil',
-                        'action': 'load'
+                        'url': 'https://duviz.xyz/login',
+                        'action': 'postToken'
                     }
                 ]
             }
         ";
+        public string lastJson = "";
 
         public void Start()
         {
-            LoadWebsite(mainUrl);
+            PostWebsite(mainUrl, new Dictionary<string, string> { { "token", GetToken() } });
+        }
+
+        public void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape)) gameObject.SetActive(false);
         }
 
         public void LoadWebsite(string url, bool deletePrev = true)
@@ -62,6 +69,8 @@ namespace UltraNet.Canvas
             {
                 if (json != null)
                 {
+                    if (json == "?")
+                        return;
                     ParseJson(json);
                 }
                 else
@@ -79,6 +88,8 @@ namespace UltraNet.Canvas
             {
                 if (json != null)
                 {
+                    if (json == "?")
+                        return;
                     ParseJson(json);
                 }
                 else
@@ -90,6 +101,7 @@ namespace UltraNet.Canvas
 
         public void ParseJson(string json)
         {
+            if (lastJson == json) return;
             CleanUp();
 
             JObject root;
@@ -112,9 +124,6 @@ namespace UltraNet.Canvas
                 string cookieValue = root["cookieValue"]?.ToString() ?? "Element";
                 PlayerPrefs.SetString(cookieKey, cookieValue);
             }
-
-            if (root["scrollbar"] != null)
-                resetScrollbar.ResetPos((float)root["scrollbar"]);
 
 
             List<(string, TMP_InputField)> inputFields = [];
@@ -171,12 +180,18 @@ namespace UltraNet.Canvas
                             string url = element["url"]?.ToString();
                             string action = element["action"]?.ToString();
                             string inputFieldName = element["inputFieldName"]?.ToString();
+                            bool reload = element["reload"] == null || (bool)element["reload"];
+                            float timer = element["timer"] != null ? (float)element["timer"] : 0f;
+                            if (timer > 0)
+                            {
+                                StartCoroutine(TimerButton(buttonComp, timer));
+                            }
                             buttonComp.onClick.AddListener(() =>
                             {
                                 switch (action)
                                 {
                                     case "load":
-                                        LoadWebsite(url);
+                                        LoadWebsite(url, reload);
                                         break;
                                     case "post":
                                         if (!string.IsNullOrEmpty(inputFieldName))
@@ -184,7 +199,7 @@ namespace UltraNet.Canvas
                                             var inputField = inputFields.FirstOrDefault(f => f.Item1 == inputFieldName).Item2;
                                             if (inputField != null)
                                             {
-                                                PostWebsite(url, new Dictionary<string, string> { { "input", inputField.text }, { "token", GetToken() }});
+                                                PostWebsite(url, new Dictionary<string, string> { { "input", inputField.text }, { "token", GetToken() }}, reload);
                                             }
                                             else
                                             {
@@ -193,7 +208,7 @@ namespace UltraNet.Canvas
                                         }
                                         break;
                                     case "postToken":
-                                        PostWebsite(url, new Dictionary<string, string> { { "token", GetToken() } });
+                                        PostWebsite(url, new Dictionary<string, string> { { "token", GetToken() } }, reload);
                                         break;
                                     case "open":
                                         Application.OpenURL(url);
@@ -215,6 +230,17 @@ namespace UltraNet.Canvas
                         break;
                 }
             }
+
+            if (root["scrollbar"] != null)
+            {
+                float scrollbar = float.Parse(root["scrollbar"].ToString());
+                UnityEngine.Canvas.ForceUpdateCanvases();
+                scrollRect.verticalNormalizedPosition = scrollbar;
+                resetScrollbar.ResetPos(scrollbar);
+                UnityEngine.Canvas.ForceUpdateCanvases();
+            }
+
+            lastJson = json;
         }
 
         #region HELPERS
@@ -244,6 +270,9 @@ namespace UltraNet.Canvas
 
                 if (www.result != UnityWebRequest.Result.Success)
                 {
+                    if (!string.IsNullOrEmpty(www.error))
+                        if (www.error.Contains("Unknown Error"))
+                            callback?.Invoke("?");
                     Plugin.LogError("Failed to load string: " + www.error);
                     callback?.Invoke(null);
                 }
@@ -266,6 +295,9 @@ namespace UltraNet.Canvas
                 yield return www.SendWebRequest();
                 if (www.result != UnityWebRequest.Result.Success)
                 {
+                    if (!string.IsNullOrEmpty(www.error))
+                        if (www.error.Contains("Unknown Error"))
+                            callback?.Invoke("?");
                     Plugin.LogError("Failed to post request: " + www.error);
                     callback?.Invoke(null);
                 }
@@ -279,6 +311,14 @@ namespace UltraNet.Canvas
         public string GetToken()
         {
             return PlayerPrefs.GetString("UltranetToken", "");
+        }
+
+        public IEnumerator TimerButton(Button button, float time)
+        {
+            if (button == null) yield break;
+            yield return new WaitForSeconds(time);
+            button.onClick.Invoke();
+            StartCoroutine(TimerButton(button, time));
         }
         #endregion
     }
