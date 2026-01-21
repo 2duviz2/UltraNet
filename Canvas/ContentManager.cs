@@ -71,6 +71,15 @@ namespace UltraNet.Canvas
             }
         }
 
+        public void OnEnable()
+        {
+            if (titleText.text.Contains("LOADING"))
+            {
+                lastJson = "";
+                PostWebsite(mainUrl, new Dictionary<string, string> { { "token", GetToken() } });
+            }
+        }
+
         public void LoadWebsite(string url, bool deletePrev = true)
         {
             StopAllCoroutines();
@@ -213,6 +222,7 @@ namespace UltraNet.Canvas
                             if (transparent)
                                 buttonComp.targetGraphic.color = new Color(0, 0, 0, 0);
                             float timer = element["timer"] != null ? (float)element["timer"] : 0f;
+                            string copy = element["copyText"]?.ToString();
                             if (timer > 0)
                             {
                                 StartCoroutine(TimerButton(buttonComp, timer));
@@ -244,6 +254,9 @@ namespace UltraNet.Canvas
                                         break;
                                     case "open":
                                         Application.OpenURL(url);
+                                        break;
+                                    case "copy":
+                                        GUIUtility.systemCopyBuffer = copy;
                                         break;
                                     default:
                                         Plugin.LogWarning($"Unknown button action: {action}");
