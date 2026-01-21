@@ -53,18 +53,28 @@ namespace UltraNet.Canvas
 
         public void Start()
         {
+            transform.GetChild(1).GetComponent<Animator>().updateMode = AnimatorUpdateMode.UnscaledTime;
             PostWebsite(mainUrl, new Dictionary<string, string> { { "token", GetToken() } });
         }
 
         public void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Escape)) gameObject.SetActive(false);
+            OptionsManager.Instance.Pause();
+            Time.timeScale = 0f;
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                Time.timeScale = 1f;
+                gameObject.SetActive(false);
+                OptionsManager.Instance.UnPause();
+            }
         }
 
         public void LoadWebsite(string url, bool deletePrev = true)
         {
             StopAllCoroutines();
-            if (deletePrev) CleanUp();
+            if (deletePrev) { CleanUp(); lastJson = null; }
             StartCoroutine(GetStringFromUrl(url, (json) =>
             {
                 if (json != null)
@@ -83,7 +93,7 @@ namespace UltraNet.Canvas
         public void PostWebsite(string url, Dictionary<string, string> postData,  bool deletePrev = true)
         {
             StopAllCoroutines();
-            if (deletePrev) CleanUp();
+            if (deletePrev) { CleanUp(); lastJson = null; }
             StartCoroutine(PostRequest(url, postData, (json) =>
             {
                 if (json != null)
@@ -152,6 +162,19 @@ namespace UltraNet.Canvas
                     element["height"] != null ? (float)element["height"] : rectTransform.sizeDelta.y
                 );
 
+                if (Plugin.debugMode)
+                {
+                    GameObject idText = Instantiate(textPrefab, obj.transform);
+                    idText.GetComponent<RectTransform>().localPosition = new Vector3(600, 0, 0);
+                    TMP_Text idTextComp = idText.GetComponent<TMP_Text>();
+                    idTextComp.alignment = TextAlignmentOptions.Left;
+                    idTextComp.text = $"#{obj.name}";
+                    idTextComp.enableAutoSizing = false;
+                    idTextComp.fontSize = 16;
+                    idTextComp.color = new Color(1, 1, 1, 1f);
+                    idTextComp.raycastTarget = false;
+                }
+
                 // Set specific properties
                 switch (type)
                 {
@@ -161,7 +184,9 @@ namespace UltraNet.Canvas
 
                         {
                             textComp.text = element["text"]?.ToString() ?? "Text";
-                            textComp.color = ParseColor(element["color"]?.ToString());
+                            if (element["color"] != null)
+                                textComp.color = ParseColor(element["color"]?.ToString());
+                            textComp.alignment = element["alignment"] != null ? (TextAlignmentOptions)Enum.Parse(typeof(TextAlignmentOptions), element["alignment"].ToString()) : TextAlignmentOptions.Center;
                         }
                         break;
                     case "image":
@@ -177,10 +202,16 @@ namespace UltraNet.Canvas
                         if (buttonTextComp != null)
                         {
                             buttonTextComp.text = element["text"]?.ToString() ?? "Button";
+                            if (element["color"] != null)
+                                buttonTextComp.color = ParseColor(element["color"]?.ToString());
+                            buttonTextComp.alignment = element["alignment"] != null ? (TextAlignmentOptions)Enum.Parse(typeof(TextAlignmentOptions), element["alignment"].ToString()) : TextAlignmentOptions.Center;
                             string url = element["url"]?.ToString();
                             string action = element["action"]?.ToString();
                             string inputFieldName = element["inputFieldName"]?.ToString();
                             bool reload = element["reload"] == null || (bool)element["reload"];
+                            bool transparent = element["transparent"] != null && (bool)element["transparent"];
+                            if (transparent)
+                                buttonComp.targetGraphic.color = new Color(0, 0, 0, 0);
                             float timer = element["timer"] != null ? (float)element["timer"] : 0f;
                             if (timer > 0)
                             {
@@ -199,6 +230,7 @@ namespace UltraNet.Canvas
                                             var inputField = inputFields.FirstOrDefault(f => f.Item1 == inputFieldName).Item2;
                                             if (inputField != null)
                                             {
+                                                PlayerPrefs.SetString("Ultranet_InputField_" + inputFieldName, "");
                                                 PostWebsite(url, new Dictionary<string, string> { { "input", inputField.text }, { "token", GetToken() }}, reload);
                                             }
                                             else
@@ -226,6 +258,26 @@ namespace UltraNet.Canvas
                         {
                             inputFieldComp.placeholder.GetComponent<TMP_Text>().text = element["text"]?.ToString() ?? "Enter text...";
                             inputFields.Add((obj.name, inputFieldComp));
+                            if (element["saveValue"] != null)
+                            {
+                                string savedValue = PlayerPrefs.GetString("Ultranet_InputField_" + obj.name, "");
+                                string savedCursorPosStr = PlayerPrefs.GetString("Ultranet_InputField_" + obj.name + "_CursorPos", "0");
+                                inputFieldComp.text = savedValue;
+                                inputFieldComp.caretPosition = PlayerPrefs.GetInt("Ultranet_InputField_" + obj.name + "_CursorPos");
+                                inputFieldComp.selectionAnchorPosition = PlayerPrefs.GetInt("Ultranet_InputField_" + obj.name + "_CursorPos2");
+                                inputFieldComp.selectionFocusPosition = PlayerPrefs.GetInt("Ultranet_InputField_" + obj.name + "_CursorPos3");
+                                inputFieldComp.onEndEdit.AddListener((value) =>
+                                {
+                                    PlayerPrefs.SetString("Ultranet_InputField_" + obj.name, value);
+                                    PlayerPrefs.SetInt("Ultranet_InputField_" + obj.name + "_CursorPos", inputFieldComp.stringPosition);
+                                    PlayerPrefs.SetInt("Ultranet_InputField_" + obj.name + "_CursorPos2", inputFieldComp.selectionAnchorPosition);
+                                    PlayerPrefs.SetInt("Ultranet_InputField_" + obj.name + "_CursorPos3", inputFieldComp.selectionFocusPosition);
+                                });
+                            }
+                            if (element["selectOnLoad"] != null)
+                            {
+                                inputFieldComp.Select();
+                            }
                         }
                         break;
                 }
@@ -266,6 +318,7 @@ namespace UltraNet.Canvas
         {
             using (UnityWebRequest www = UnityWebRequest.Get(url))
             {
+                www.timeout = 5;
                 yield return www.SendWebRequest();
 
                 if (www.result != UnityWebRequest.Result.Success)
@@ -292,6 +345,7 @@ namespace UltraNet.Canvas
             }
             using (UnityWebRequest www = UnityWebRequest.Post(url, form))
             {
+                www.timeout = 5;
                 yield return www.SendWebRequest();
                 if (www.result != UnityWebRequest.Result.Success)
                 {
@@ -316,7 +370,7 @@ namespace UltraNet.Canvas
         public IEnumerator TimerButton(Button button, float time)
         {
             if (button == null) yield break;
-            yield return new WaitForSeconds(time);
+            yield return new WaitForSecondsRealtime(time);
             button.onClick.Invoke();
             StartCoroutine(TimerButton(button, time));
         }

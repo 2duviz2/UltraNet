@@ -10,6 +10,7 @@ using UnityEngine.EventSystems;
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin instance;
+    public static bool debugMode = true;
 
     GameObject canvasObject;
     GameObject canvasInstance;
