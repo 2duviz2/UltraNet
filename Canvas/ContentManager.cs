@@ -211,22 +211,26 @@ namespace UltraNet.Canvas
                         if (buttonTextComp != null)
                         {
                             buttonTextComp.text = element["text"]?.ToString() ?? "Button";
+                            buttonTextComp.alignment = element["alignment"] != null ? (TextAlignmentOptions)Enum.Parse(typeof(TextAlignmentOptions), element["alignment"].ToString()) : TextAlignmentOptions.Center;
                             if (element["color"] != null)
                                 buttonTextComp.color = ParseColor(element["color"]?.ToString());
-                            buttonTextComp.alignment = element["alignment"] != null ? (TextAlignmentOptions)Enum.Parse(typeof(TextAlignmentOptions), element["alignment"].ToString()) : TextAlignmentOptions.Center;
+                            
                             string url = element["url"]?.ToString();
                             string action = element["action"]?.ToString();
                             string inputFieldName = element["inputFieldName"]?.ToString();
+                            string copy = element["copyText"]?.ToString();
                             bool reload = element["reload"] == null || (bool)element["reload"];
                             bool transparent = element["transparent"] != null && (bool)element["transparent"];
+                            bool forcePlayer = element["forcePlayer"] != null && (bool)element["forcePlayer"];
+                            float timer = element["timer"] != null ? (float)element["timer"] : 0f;
+                            
                             if (transparent)
                                 buttonComp.targetGraphic.color = new Color(0, 0, 0, 0);
-                            float timer = element["timer"] != null ? (float)element["timer"] : 0f;
-                            string copy = element["copyText"]?.ToString();
+                            if (forcePlayer)
+                                obj.AddComponent<InteractableOnPlayer>();
                             if (timer > 0)
-                            {
                                 StartCoroutine(TimerButton(buttonComp, timer));
-                            }
+
                             buttonComp.onClick.AddListener(() =>
                             {
                                 switch (action)
@@ -241,7 +245,7 @@ namespace UltraNet.Canvas
                                             if (inputField != null)
                                             {
                                                 PlayerPrefs.SetString("Ultranet_InputField_" + inputFieldName, "");
-                                                PostWebsite(url, new Dictionary<string, string> { { "input", inputField.text }, { "token", GetToken() }}, reload);
+                                                PostWebsite(url, new Dictionary<string, string> { { "input", inputField.text }, { "token", GetToken() }, { "position", GetPosition() }, { "level", SceneHelper.CurrentScene } }, reload);
                                             }
                                             else
                                             {
@@ -378,6 +382,11 @@ namespace UltraNet.Canvas
         public string GetToken()
         {
             return PlayerPrefs.GetString("UltranetToken", "");
+        }
+
+        public string GetPosition()
+        {
+            return NewMovement.Instance != null && NewMovement.Instance.activated ? NewMovement.Instance.transform.position.ToString() : "";
         }
 
         public IEnumerator TimerButton(Button button, float time)
