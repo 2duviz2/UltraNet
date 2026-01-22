@@ -379,12 +379,12 @@ namespace UltraNet.Canvas
             }
         }
 
-        public string GetToken()
+        public static string GetToken()
         {
             return PlayerPrefs.GetString("UltranetToken", "");
         }
 
-        public string GetPosition()
+        public static string GetPosition()
         {
             return NewMovement.Instance != null && NewMovement.Instance.activated ? NewMovement.Instance.transform.position.ToString() : "";
         }
