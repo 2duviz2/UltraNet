@@ -355,6 +355,8 @@ namespace UltraNet.Canvas
 
         public static IEnumerator PostRequest(string url, Dictionary<string, string> postData, System.Action<string> callback)
         {
+            float startTime = Time.realtimeSinceStartup;
+
             WWWForm form = new WWWForm();
             foreach (var pair in postData)
             {
@@ -374,6 +376,7 @@ namespace UltraNet.Canvas
                 }
                 else
                 {
+                    //Plugin.LogInfo($"Time taken: {Time.realtimeSinceStartup - startTime}. Time: {Time.realtimeSinceStartup}");
                     callback?.Invoke(www.downloadHandler.text);
                 }
             }

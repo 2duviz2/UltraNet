@@ -3,6 +3,7 @@
 using BepInEx;
 using HarmonyLib;
 using TMPro;
+using UltraNet.Classes;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -29,11 +30,17 @@ public class Plugin : BaseUnityPlugin
     public void Start()
     {
         GameObject obj = new GameObject("BundlesManager");
+        GameObject playerFetcher = new GameObject("PlayerFetcher");
+
         obj.AddComponent<BundlesManager>();
+        playerFetcher.AddComponent<PlayerFetcher>();
+
         canvasObject = BundlesManager.netBundle.LoadAsset<GameObject>("UltraNetCanvas");
         canvasInstance = Instantiate(canvasObject);
         canvasInstance.SetActive(false);
+
         DontDestroyOnLoad(canvasInstance);
+        DontDestroyOnLoad(playerFetcher);
     }
 
     public void Update()

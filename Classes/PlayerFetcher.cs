@@ -19,22 +19,27 @@ namespace UltraNet.Classes
 
         public float syncTime = 0.2f;
 
-
         public void Update()
         {
             timer += Time.unscaledDeltaTime;
 
-            if (timer > syncTime)
+            if (timer >= syncTime)
             {
+                if (SceneHelper.CurrentScene == "Main Menu" || NewMovement.Instance == null) return;
                 timer = 0;
                 Sync();
             }
         }
 
+        bool _busy = false;
         public void Sync()
         {
+            if (_busy) { timer = syncTime; return; }
+            _busy = true;
+            StopAllCoroutines();
             StartCoroutine(ContentManager.PostRequest(syncUrl, new Dictionary<string, string> { { "token", ContentManager.GetToken() }, { "position", ContentManager.GetPosition() }, { "level", SceneHelper.CurrentScene } }, (json) =>
             {
+                _busy = false;
                 if (json != null)
                 {
                     ParseJson(json);
@@ -42,11 +47,16 @@ namespace UltraNet.Classes
             }));
         }
 
-        public void CreatePlayer(string id, Vector3 pos)
+        public GameObject CreatePlayer(string id, Vector3 pos)
         {
             GameObject plr = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            Destroy(plr.GetComponent<Collider>());
+            Renderer r = plr.GetComponent<MeshRenderer>();
+            r.material = new Material(DefaultReferenceManager.Instance.masterShader);
             plr.transform.position = pos;
+            plr.AddComponent<UltraNet.Classes.Player>();
             players.Add(id, plr);
+            return plr;
         }
 
         public void ParseJson(string json)
@@ -63,11 +73,21 @@ namespace UltraNet.Classes
             }
 
             List<string> iteratedPlayers = [];
-            foreach (var player in root["players"])
+            foreach (var prop in (JObject)root["players"])
             {
-                iteratedPlayers.Add(player["id"].ToString());
+                string id = prop.Key;
+                JObject player = (JObject)prop.Value;
+                string positionString = player["position"]?.ToString();
+                string isoTimeStamp = player["timestamp"].ToString();
+                DateTime dateTime = DateTime.Parse(isoTimeStamp, null, System.Globalization.DateTimeStyles.AssumeUniversal);
+                Vector3 position = ParseVector3(positionString);
+                GameObject foundPlayer = players.FirstOrDefault(p => p.Key == id).Value;
 
+                iteratedPlayers.Add(id);
 
+                if (foundPlayer == null)
+                    foundPlayer = CreatePlayer(id, position);
+                foundPlayer.GetComponent<UltraNet.Classes.Player>().SetTarget(position, dateTime);
             }
 
             foreach (var plr in players)
@@ -80,5 +100,61 @@ namespace UltraNet.Classes
                 }
             }
         }
+
+        #region HELPERS
+        Vector4 ParseVector4(string input)
+        {
+            input = input.Trim('(', ')', ' ');
+            var parts = input.Split(',');
+
+            if (parts.Length != 4)
+            {
+                Plugin.LogError($"Invalid Vector4 format: {input}");
+                return Vector4.zero;
+            }
+
+            return new Vector4(
+                float.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture),
+                float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture),
+                float.Parse(parts[2], System.Globalization.CultureInfo.InvariantCulture),
+                float.Parse(parts[3], System.Globalization.CultureInfo.InvariantCulture)
+            );
+        }
+
+        public static Vector3 ParseVector3(string input)
+        {
+            input = input.Trim('(', ')', ' ');
+            var parts = input.Split(',');
+
+            if (parts.Length != 3)
+            {
+                Plugin.LogError($"Invalid Vector3 format: {input}");
+                return Vector3.zero;
+            }
+
+            return new Vector3(
+                float.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture) + 3,
+                float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture),
+                float.Parse(parts[2], System.Globalization.CultureInfo.InvariantCulture)
+            );
+        }
+
+        public static Vector2 ParseVector2(string input)
+        {
+            input = input.Trim('(', ')', ' ');
+            var parts = input.Split(',');
+
+            if (parts.Length != 2)
+            {
+                Plugin.LogError($"Invalid Vector2 format: {input}");
+                return Vector2.zero;
+            }
+
+            return new Vector2(
+                float.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture),
+                float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture)
+            );
+        }
+        #endregion
     }
 }
