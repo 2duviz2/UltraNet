@@ -235,6 +235,8 @@ namespace UltraNet.Canvas
                             if (timer > 0)
                                 Numerators.instance.StartCoroutine(Numerators.instance.TimerButton(buttonComp, timer));
 
+                            if (action == "post") obj.AddComponent<EnterButton>();
+
                             buttonComp.onClick.AddListener(() =>
                             {
                                 switch (action)

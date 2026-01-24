@@ -17,6 +17,9 @@ public class Plugin : BaseUnityPlugin
     GameObject canvasObject;
     GameObject canvasInstance;
 
+    bool lastPlayerActive = false;
+    bool openedOnce = false;
+
     public void Awake()
     {
         hideFlags = UnityEngine.HideFlags.HideAndDontSave;
@@ -44,6 +47,8 @@ public class Plugin : BaseUnityPlugin
 
         DontDestroyOnLoad(canvasInstance);
         DontDestroyOnLoad(playerFetcher);
+
+        openedOnce = PlayerPrefs.GetInt("UltraNet_Opened", 0) == 1;
     }
 
     public void Update()
@@ -53,6 +58,20 @@ public class Plugin : BaseUnityPlugin
             if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject != null && EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null && EventSystem.current.currentSelectedGameObject.GetComponent<GayInputField>() != null && EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>().isFocused && EventSystem.current.currentSelectedGameObject.activeInHierarchy)
                 return;
             canvasInstance.SetActive(!canvasInstance.activeSelf);
+            if (!openedOnce)
+            {
+                PlayerPrefs.SetInt("UltraNet_Opened", 1);
+                openedOnce = true;
+            }
+        }
+
+        if (NewMovement.Instance != null && !openedOnce)
+        {
+            if (lastPlayerActive != NewMovement.Instance.activated)
+            {
+                HudMessageReceiver.Instance.SendHudMessage("Press <color=#ff66cc>(T)</color> to open <color=#66ff66>UltraNet</color>");
+            }
+            lastPlayerActive = NewMovement.Instance.activated;
         }
     }
 
