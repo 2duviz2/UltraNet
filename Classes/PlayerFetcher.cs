@@ -73,6 +73,12 @@ namespace UltraNet.Classes
                 return;
             }
 
+            foreach (var plr in players)
+            {
+                if (plr.Value == null)
+                    players.Remove(plr.Key);
+            }
+
             List<string> iteratedPlayers = [];
             foreach (var prop in (JObject)root["players"])
             {
