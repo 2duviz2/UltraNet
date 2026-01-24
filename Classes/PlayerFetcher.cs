@@ -17,7 +17,7 @@ namespace UltraNet.Classes
 
         Dictionary<string, GameObject> players = [];
 
-        public float syncTime = 0.2f;
+        public float syncTime = 0.1f;
 
         public void Update()
         {
@@ -47,14 +47,15 @@ namespace UltraNet.Classes
             }));
         }
 
-        public GameObject CreatePlayer(string id, Vector3 pos)
+        public GameObject CreatePlayer(string id, Vector3 pos, string name)
         {
-            GameObject plr = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            Destroy(plr.GetComponent<Collider>());
+            GameObject plr = /*GameObject.CreatePrimitive(PrimitiveType.Sphere);*/ new GameObject("Player viewer");
+            /*Destroy(plr.GetComponent<Collider>());
             Renderer r = plr.GetComponent<MeshRenderer>();
-            r.material = new Material(DefaultReferenceManager.Instance.masterShader);
+            r.material = new Material(DefaultReferenceManager.Instance.masterShader);*/
             plr.transform.position = pos;
-            plr.AddComponent<UltraNet.Classes.Player>();
+            UltraNet.Classes.Player p = plr.AddComponent<UltraNet.Classes.Player>();
+            p.CreateName(name);
             players.Add(id, plr);
             return plr;
         }
@@ -78,6 +79,7 @@ namespace UltraNet.Classes
                 string id = prop.Key;
                 JObject player = (JObject)prop.Value;
                 string positionString = player["position"]?.ToString();
+                string playerName = player["name"]?.ToString();
                 string isoTimeStamp = player["timestamp"].ToString();
                 DateTime dateTime = DateTime.Parse(isoTimeStamp, null, System.Globalization.DateTimeStyles.AssumeUniversal);
                 Vector3 position = ParseVector3(positionString);
@@ -86,7 +88,7 @@ namespace UltraNet.Classes
                 iteratedPlayers.Add(id);
 
                 if (foundPlayer == null)
-                    foundPlayer = CreatePlayer(id, position);
+                    foundPlayer = CreatePlayer(id, position, playerName);
                 foundPlayer.GetComponent<UltraNet.Classes.Player>().SetTarget(position, dateTime);
             }
 
@@ -96,7 +98,8 @@ namespace UltraNet.Classes
                 {
                     GameObject p = plr.Value;
                     players.Remove(plr.Key);
-                    Destroy(p);
+                    if (p != null)
+                        Destroy(p);
                 }
             }
         }
@@ -133,7 +136,7 @@ namespace UltraNet.Classes
             }
 
             return new Vector3(
-                float.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture) + 3,
+                float.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture),
                 float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture),
                 float.Parse(parts[2], System.Globalization.CultureInfo.InvariantCulture)
             );
