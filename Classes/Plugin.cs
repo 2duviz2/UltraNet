@@ -3,6 +3,7 @@
 using BepInEx;
 using HarmonyLib;
 using TMPro;
+using UltraNet.Canvas;
 using UltraNet.Classes;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -34,7 +35,9 @@ public class Plugin : BaseUnityPlugin
 
         obj.AddComponent<BundlesManager>();
         playerFetcher.AddComponent<PlayerFetcher>();
+        gameObject.AddComponent<Numerators>();
 
+        GameObject notifications = Instantiate(BundlesManager.netBundle.LoadAsset<GameObject>("UltraNetNotifications"));
         canvasObject = BundlesManager.netBundle.LoadAsset<GameObject>("UltraNetCanvas");
         canvasInstance = Instantiate(canvasObject);
         canvasInstance.SetActive(false);
@@ -47,7 +50,7 @@ public class Plugin : BaseUnityPlugin
     {
         if (Input.GetKeyDown(KeyCode.T))
         {
-            if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject != null && EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null)
+            if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject != null && EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null && EventSystem.current.currentSelectedGameObject.GetComponent<GayInputField>() != null && EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>().isFocused && EventSystem.current.currentSelectedGameObject.activeInHierarchy)
                 return;
             canvasInstance.SetActive(!canvasInstance.activeSelf);
         }

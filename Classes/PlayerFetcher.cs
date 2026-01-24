@@ -37,7 +37,7 @@ namespace UltraNet.Classes
             if (_busy) { timer = syncTime; return; }
             _busy = true;
             StopAllCoroutines();
-            StartCoroutine(ContentManager.PostRequest(syncUrl, new Dictionary<string, string> { { "token", ContentManager.GetToken() }, { "position", ContentManager.GetPosition() }, { "level", SceneHelper.CurrentScene } }, (json) =>
+            StartCoroutine(Numerators.PostRequest(syncUrl, new Dictionary<string, string> { { "token", ContentManager.GetToken() }, { "position", ContentManager.GetPosition() }, { "level", SceneHelper.CurrentScene } }, (json) =>
             {
                 _busy = false;
                 if (json != null)

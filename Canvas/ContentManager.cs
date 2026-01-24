@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using TMPro;
+using UltraNet.Classes;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -82,9 +83,10 @@ namespace UltraNet.Canvas
 
         public void LoadWebsite(string url, bool deletePrev = true)
         {
-            StopAllCoroutines();
+            if (deletePrev)
+                Numerators.instance.StopAllCoroutines();
             if (deletePrev) { CleanUp(); lastJson = null; }
-            StartCoroutine(GetStringFromUrl(url, (json) =>
+            Numerators.instance.StartCoroutine(Numerators.GetStringFromUrl(url, (json) =>
             {
                 if (json != null)
                 {
@@ -101,9 +103,10 @@ namespace UltraNet.Canvas
 
         public void PostWebsite(string url, Dictionary<string, string> postData,  bool deletePrev = true)
         {
-            StopAllCoroutines();
+            if (deletePrev)
+                Numerators.instance.StopAllCoroutines();
             if (deletePrev) { CleanUp(); lastJson = null; }
-            StartCoroutine(PostRequest(url, postData, (json) =>
+            Numerators.instance.StartCoroutine(Numerators.PostRequest(url, postData, (json) =>
             {
                 if (json != null)
                 {
@@ -121,6 +124,7 @@ namespace UltraNet.Canvas
         public void ParseJson(string json)
         {
             if (lastJson == json) return;
+            if (!gameObject.activeInHierarchy) NotificationListener.Show();
             CleanUp();
 
             JObject root;
@@ -229,7 +233,7 @@ namespace UltraNet.Canvas
                             if (forcePlayer)
                                 obj.AddComponent<InteractableOnPlayer>();
                             if (timer > 0)
-                                StartCoroutine(TimerButton(buttonComp, timer));
+                                Numerators.instance.StartCoroutine(Numerators.instance.TimerButton(buttonComp, timer));
 
                             buttonComp.onClick.AddListener(() =>
                             {
@@ -273,6 +277,7 @@ namespace UltraNet.Canvas
                         var inputFieldComp = obj.GetComponentInChildren<TMP_InputField>();
                         if (inputFieldComp != null)
                         {
+                            inputFieldComp.gameObject.AddComponent<GayInputField>();
                             inputFieldComp.placeholder.GetComponent<TMP_Text>().text = element["text"]?.ToString() ?? "Enter text...";
                             inputFields.Add((obj.name, inputFieldComp));
                             if (element["saveValue"] != null)
@@ -280,9 +285,16 @@ namespace UltraNet.Canvas
                                 string savedValue = PlayerPrefs.GetString("Ultranet_InputField_" + obj.name, "");
                                 string savedCursorPosStr = PlayerPrefs.GetString("Ultranet_InputField_" + obj.name + "_CursorPos", "0");
                                 inputFieldComp.text = savedValue;
-                                inputFieldComp.caretPosition = PlayerPrefs.GetInt("Ultranet_InputField_" + obj.name + "_CursorPos");
-                                inputFieldComp.selectionAnchorPosition = PlayerPrefs.GetInt("Ultranet_InputField_" + obj.name + "_CursorPos2");
-                                inputFieldComp.selectionFocusPosition = PlayerPrefs.GetInt("Ultranet_InputField_" + obj.name + "_CursorPos3");
+                                try
+                                {
+                                    inputFieldComp.caretPosition = PlayerPrefs.GetInt("Ultranet_InputField_" + obj.name + "_CursorPos");
+                                    inputFieldComp.selectionAnchorPosition = PlayerPrefs.GetInt("Ultranet_InputField_" + obj.name + "_CursorPos2");
+                                    inputFieldComp.selectionFocusPosition = PlayerPrefs.GetInt("Ultranet_InputField_" + obj.name + "_CursorPos3");
+                                }
+                                catch
+                                {
+
+                                }
                                 inputFieldComp.onEndEdit.AddListener((value) =>
                                 {
                                     PlayerPrefs.SetString("Ultranet_InputField_" + obj.name, value);
@@ -331,57 +343,6 @@ namespace UltraNet.Canvas
             titleText.text = "LOADING...";
         }
 
-        public static IEnumerator GetStringFromUrl(string url, System.Action<string> callback)
-        {
-            using (UnityWebRequest www = UnityWebRequest.Get(url))
-            {
-                www.timeout = 5;
-                yield return www.SendWebRequest();
-
-                if (www.result != UnityWebRequest.Result.Success)
-                {
-                    if (!string.IsNullOrEmpty(www.error))
-                        if (www.error.Contains("Unknown Error"))
-                            callback?.Invoke("?");
-                    Plugin.LogError("Failed to load string: " + www.error);
-                    callback?.Invoke(null);
-                }
-                else
-                {
-                    callback?.Invoke(www.downloadHandler.text);
-                }
-            }
-        }
-
-        public static IEnumerator PostRequest(string url, Dictionary<string, string> postData, System.Action<string> callback)
-        {
-            float startTime = Time.realtimeSinceStartup;
-
-            WWWForm form = new WWWForm();
-            foreach (var pair in postData)
-            {
-                form.AddField(pair.Key, pair.Value);
-            }
-            using (UnityWebRequest www = UnityWebRequest.Post(url, form))
-            {
-                www.timeout = 5;
-                yield return www.SendWebRequest();
-                if (www.result != UnityWebRequest.Result.Success)
-                {
-                    if (!string.IsNullOrEmpty(www.error))
-                        if (www.error.Contains("Unknown Error"))
-                            callback?.Invoke("?");
-                    Plugin.LogError("Failed to post request: " + www.error);
-                    callback?.Invoke(null);
-                }
-                else
-                {
-                    //Plugin.LogInfo($"Time taken: {Time.realtimeSinceStartup - startTime}. Time: {Time.realtimeSinceStartup}");
-                    callback?.Invoke(www.downloadHandler.text);
-                }
-            }
-        }
-
         public static string GetToken()
         {
             return PlayerPrefs.GetString("UltranetToken", "");
@@ -389,15 +350,8 @@ namespace UltraNet.Canvas
 
         public static string GetPosition()
         {
+            return Camera.main.transform.position.ToString();
             return NewMovement.Instance != null && NewMovement.Instance.activated ? NewMovement.Instance.transform.position.ToString() : "";
-        }
-
-        public IEnumerator TimerButton(Button button, float time)
-        {
-            if (button == null) yield break;
-            yield return new WaitForSecondsRealtime(time);
-            button.onClick.Invoke();
-            StartCoroutine(TimerButton(button, time));
         }
         #endregion
     }
