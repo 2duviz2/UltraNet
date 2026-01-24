@@ -17,7 +17,7 @@ namespace UltraNet.Classes
 
         Dictionary<string, GameObject> players = [];
 
-        public float syncTime = 0.1f;
+        public float syncTime = 0.3f;
 
         public void Update()
         {
@@ -37,7 +37,7 @@ namespace UltraNet.Classes
             if (_busy) { timer = syncTime; return; }
             _busy = true;
             StopAllCoroutines();
-            StartCoroutine(Numerators.PostRequest(syncUrl, new Dictionary<string, string> { { "token", ContentManager.GetToken() }, { "position", ContentManager.GetPosition() }, { "level", SceneHelper.CurrentScene } }, (json) =>
+            StartCoroutine(Numerators.PostRequest(syncUrl, new Dictionary<string, string> { { "token", ContentManager.GetToken() }, { "position", ContentManager.GetPosition() }, { "level", SceneHelper.CurrentScene }, { "cheats", CheatsActive().ToString() } }, (json) =>
             {
                 _busy = false;
                 if (json != null)
@@ -87,6 +87,8 @@ namespace UltraNet.Classes
                 string positionString = player["position"]?.ToString();
                 string playerName = player["name"]?.ToString();
                 string isoTimeStamp = player["timestamp"].ToString();
+                string cheatsString = player["cheats"].ToString();
+                bool cheats = cheatsString.ToLower() == "true";
                 DateTime dateTime = DateTime.Parse(isoTimeStamp, null, System.Globalization.DateTimeStyles.AssumeUniversal);
                 Vector3 position = ParseVector3(positionString);
                 GameObject foundPlayer = players.FirstOrDefault(p => p.Key == id).Value;
@@ -95,7 +97,7 @@ namespace UltraNet.Classes
 
                 if (foundPlayer == null)
                     foundPlayer = CreatePlayer(id, position, playerName);
-                foundPlayer.GetComponent<UltraNet.Classes.Player>().SetTarget(position, dateTime);
+                foundPlayer.GetComponent<UltraNet.Classes.Player>().SetTarget(position, dateTime, cheats);
             }
 
             foreach (var plr in players)
@@ -163,6 +165,11 @@ namespace UltraNet.Classes
                 float.Parse(parts[0], System.Globalization.CultureInfo.InvariantCulture),
                 float.Parse(parts[1], System.Globalization.CultureInfo.InvariantCulture)
             );
+        }
+
+        public bool CheatsActive()
+        {
+            return CheatsController.Instance.cheatsEnabled || MonoSingleton<StatsManager>.Instance.majorUsed;
         }
         #endregion
     }

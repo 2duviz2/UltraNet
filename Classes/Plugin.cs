@@ -12,7 +12,7 @@ using UnityEngine.EventSystems;
 public class Plugin : BaseUnityPlugin
 {
     public static Plugin instance;
-    public static bool debugMode = true;
+    public static bool debugMode = false;
 
     GameObject canvasObject;
     GameObject canvasInstance;
@@ -26,7 +26,6 @@ public class Plugin : BaseUnityPlugin
         instance = this;
 
         new Harmony(PluginInfo.GUID).PatchAll();
-
 
         LogInfo("UltraNet loaded.");
     }

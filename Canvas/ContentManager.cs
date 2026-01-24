@@ -203,10 +203,12 @@ namespace UltraNet.Canvas
                         }
                         break;
                     case "image":
-                        var imageComp = obj.transform.GetChild(0).GetComponentInChildren<Image>();
+                        var imageComp = obj.transform.GetComponent<ImageGetter>();
                         if (imageComp != null)
                         {
-                            throw new NotImplementedException("Image loading not implemented yet.");
+                            string url = element["url"]?.ToString();
+                            imageComp.imageUrl = url;
+                            imageComp.SetImg();
                         }
                         break;
                     case "button":
