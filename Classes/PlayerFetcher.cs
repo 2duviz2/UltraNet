@@ -59,7 +59,7 @@ namespace UltraNet.Classes
             r.material = new Material(DefaultReferenceManager.Instance.masterShader);*/
             plr.transform.position = pos;
             UltraNet.Classes.Player p = plr.AddComponent<UltraNet.Classes.Player>();
-            p.CreateName(name);
+            p.CreateName(name, id);
             players.Add(id, plr);
             return plr;
         }
@@ -90,10 +90,8 @@ namespace UltraNet.Classes
                 JObject player = (JObject)prop.Value;
                 string positionString = player["position"]?.ToString();
                 string playerName = player["name"]?.ToString();
-                string isoTimeStamp = player["timestamp"].ToString();
                 string cheatsString = player["cheats"].ToString();
                 bool cheats = cheatsString.ToLower() == "true";
-                DateTime dateTime = DateTime.Parse(isoTimeStamp, null, System.Globalization.DateTimeStyles.AssumeUniversal);
                 Vector3 position = ParseVector3(positionString);
                 GameObject foundPlayer = players.FirstOrDefault(p => p.Key == id).Value;
 
@@ -101,7 +99,13 @@ namespace UltraNet.Classes
 
                 if (foundPlayer == null)
                     foundPlayer = CreatePlayer(id, position, playerName);
-                foundPlayer.GetComponent<UltraNet.Classes.Player>().SetTarget(position, dateTime, cheats);
+                foundPlayer.GetComponent<UltraNet.Classes.Player>().SetTarget(position, cheats);
+            }
+
+            foreach (var prop in (JObject)root["events"])
+            {
+                string id = prop.Key;
+                DoEvent(id);
             }
 
             foreach (var plr in players)
@@ -113,6 +117,39 @@ namespace UltraNet.Classes
                     if (p != null)
                         Destroy(p);
                 }
+            }
+        }
+
+        void DoEvent(string e)
+        {
+            if (e == "filth")
+            {
+                GameObject obj = Plugin.Ass<GameObject>("Assets/Prefabs/Enemies/Zombie.prefab");
+                GameObject inst = Instantiate(obj, NewMovement.Instance.transform.position, Quaternion.identity);
+            }
+            if (e == "stray")
+            {
+                GameObject obj = Plugin.Ass<GameObject>("Assets/Prefabs/Enemies/Projectile Zombie.prefab");
+                GameObject inst = Instantiate(obj, NewMovement.Instance.transform.position, Quaternion.identity);
+            }
+            if (e == "minos")
+            {
+                GameObject obj = Plugin.Ass<GameObject>("Assets/Prefabs/Enemies/MinosPrime.prefab");
+                GameObject inst = Instantiate(obj, NewMovement.Instance.transform.position, Quaternion.identity);
+            }
+            if (e == "explosion")
+            {
+                GameObject obj = Plugin.Ass<GameObject>("Assets/Prefabs/Attacks and Projectiles/Explosions/Explosion.prefab");
+                GameObject inst = Instantiate(obj, NewMovement.Instance.transform.position, Quaternion.identity);
+            }
+            if (e == "gravity")
+            {
+                Physics.gravity = new Vector3(-Physics.gravity.y, -Physics.gravity.z, -Physics.gravity.x);
+            }
+            if (e.StartsWith("custom_"))
+            {
+                GameObject obj = Plugin.Ass<GameObject>($"Assets/Prefabs/{e.Replace("custom_", "")}.prefab");
+                GameObject inst = Instantiate(obj, NewMovement.Instance.transform.position, Quaternion.identity);
             }
         }
 

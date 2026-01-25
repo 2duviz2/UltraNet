@@ -9,14 +9,18 @@ namespace UltraNet.Canvas
     {
         public string imageUrl;
         public RawImage image;
+        public bool modifySize = false;
 
         public void SetImg()
         {
-            RectTransform r = GetComponent<RectTransform>();
-            RectTransform r2 = image.GetComponent<RectTransform>();
-            RectTransform r3 = image.transform.parent.GetComponent<RectTransform>();
-            r2.sizeDelta = r.sizeDelta - Vector2.one * 50;
-            r3.sizeDelta = r.sizeDelta - Vector2.one * 50;
+            if (!modifySize)
+            {
+                RectTransform r = GetComponent<RectTransform>();
+                RectTransform r2 = image.GetComponent<RectTransform>();
+                RectTransform r3 = image.transform.parent.GetComponent<RectTransform>();
+                r2.sizeDelta = r.sizeDelta - Vector2.one * 50;
+                r3.sizeDelta = r.sizeDelta - Vector2.one * 50;
+            }
             image.color = Color.black;
             StartCoroutine(GetTextureFromURL(imageUrl, tex =>
             {
@@ -31,7 +35,7 @@ namespace UltraNet.Canvas
         public static bool _loaded = true;
         public static IEnumerator GetTextureFromURL(string url, System.Action<Texture2D> callback)
         {
-            while (!_loaded) yield return null;
+            //while (!_loaded) yield return null;
             _loaded = false;
             using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(url))
             {
@@ -39,7 +43,7 @@ namespace UltraNet.Canvas
 
                 if (uwr.result != UnityWebRequest.Result.Success)
                 {
-                    Debug.LogError("Failed to load texture: " + uwr.error);
+                    Plugin.LogError("Failed to load texture: " + uwr.error);
                     callback?.Invoke(null);
                     _loaded = true;
                 }

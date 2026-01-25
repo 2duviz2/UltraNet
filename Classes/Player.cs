@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TMPro;
+using UltraNet.Canvas;
 using UnityEngine;
 
 namespace UltraNet.Classes
@@ -14,7 +15,7 @@ namespace UltraNet.Classes
         string originalText;
         bool lastCheats = false;
 
-        public void SetTarget(Vector3 newPos, DateTime newTime, bool cheats)
+        public void SetTarget(Vector3 newPos, bool cheats)
         {
             targetPos = newPos;
             if (lastCheats != cheats)
@@ -24,7 +25,7 @@ namespace UltraNet.Classes
             lastCheats = cheats;
         }
 
-        public void CreateName(string text)
+        public void CreateName(string text, string id)
         {
             GameObject playerName = Instantiate(BundlesManager.netBundle.LoadAsset<GameObject>("PlayerName"));
             playerName.transform.localScale = new Vector3(-0.5f, 0.5f, 1);
@@ -32,6 +33,20 @@ namespace UltraNet.Classes
             playerName.GetComponentInChildren<TMP_Text>().text = text;
             t = playerName.GetComponentInChildren<TMP_Text>();
             originalText = text;
+
+            GetPfp(id, playerName);
+        }
+
+        public async void GetPfp(string id, GameObject obj)
+        {
+            SteamAvatarFetcher fetcher = new SteamAvatarFetcher();
+            string avatarUrl = await fetcher.GetSteamAvatarURL(id);
+
+            if (!string.IsNullOrEmpty(avatarUrl))
+            {
+                obj.GetComponentInChildren<ImageGetter>().imageUrl = avatarUrl;
+                obj.GetComponentInChildren<ImageGetter>().SetImg();
+            }
         }
 
         public void Update()

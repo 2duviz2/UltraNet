@@ -78,6 +78,12 @@ namespace UltraNet.Canvas
                 gameObject.SetActive(false);
                 OptionsManager.Instance.UnPause();
             }
+
+            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.R))
+            {
+                lastJson = "";
+                PostWebsite(mainUrl, new Dictionary<string, string> { { "token", GetToken() } });
+            }
         }
 
         public void OnEnable()
@@ -172,6 +178,7 @@ namespace UltraNet.Canvas
             {
                 if (lastTTS != root["tts"].ToString())
                 {
+                    source.volume = PlayerPrefs.GetFloat("UltranetConfig_TTSVolume", 0.5f);
                     lastTTS = root["tts"].ToString();
                     SamAPI.TryPlay(root["tts"].ToString(), source);
                 }
@@ -291,7 +298,7 @@ namespace UltraNet.Canvas
                                         }
                                         break;
                                     case "postToken":
-                                        PostWebsite(url, new Dictionary<string, string> { { "token", GetToken() } }, reload);
+                                        PostWebsite(url, new Dictionary<string, string> { { "token", GetToken() }, { "level", SceneHelper.CurrentScene } }, reload);
                                         break;
                                     case "open":
                                         Application.OpenURL(url);
@@ -310,6 +317,7 @@ namespace UltraNet.Canvas
                         var inputFieldComp = obj.GetComponentInChildren<TMP_InputField>();
                         if (inputFieldComp != null)
                         {
+                            inputFieldComp.GetComponent<RectTransform>().sizeDelta = obj.GetComponent<RectTransform>().sizeDelta - Vector2.one * 10;
                             inputFieldComp.gameObject.AddComponent<GayInputField>();
                             inputFieldComp.placeholder.GetComponent<TMP_Text>().text = element["text"]?.ToString() ?? "Enter text...";
                             inputFields.Add((obj.name, inputFieldComp));
