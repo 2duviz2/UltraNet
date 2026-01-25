@@ -54,7 +54,7 @@ public class Plugin : BaseUnityPlugin
     {
         if (Input.GetKeyDown(KeyCode.T))
         {
-            if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject != null && EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null && EventSystem.current.currentSelectedGameObject.GetComponent<GayInputField>() != null && EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>().isFocused && EventSystem.current.currentSelectedGameObject.activeInHierarchy)
+            if (UIBusy())
                 return;
             canvasInstance.SetActive(!canvasInstance.activeSelf);
             if (!openedOnce)
@@ -74,6 +74,11 @@ public class Plugin : BaseUnityPlugin
         }
     }
 
+    public static bool UIBusy()
+    {
+        return EventSystem.current != null && EventSystem.current.currentSelectedGameObject != null && EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null && EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>().isFocused && EventSystem.current.currentSelectedGameObject.activeInHierarchy;
+    }
+
     public static void LogInfo(object msg) { instance.Logger.LogInfo(msg); }
     public static void LogWarning(object msg) { instance.Logger.LogWarning(msg); }
     public static void LogError(object msg) { instance.Logger.LogError(msg); }
@@ -83,5 +88,5 @@ public class PluginInfo
 {
     public const string GUID = "duviz.UltraNet";
     public const string Name = "UltraNet";
-    public const string Version = "0.0.1";
+    public const string Version = "0.0.3";
 }

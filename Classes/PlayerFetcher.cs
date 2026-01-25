@@ -32,10 +32,14 @@ namespace UltraNet.Classes
         }
 
         bool _busy = false;
+        int attempts = 0;
         public void Sync()
         {
+            attempts++;
+            if (attempts >= 10) _busy = false;
             if (_busy) { timer = syncTime; return; }
             _busy = true;
+            attempts = 0;
             StopAllCoroutines();
             StartCoroutine(Numerators.PostRequest(syncUrl, new Dictionary<string, string> { { "token", ContentManager.GetToken() }, { "position", ContentManager.GetPosition() }, { "level", SceneHelper.CurrentScene }, { "cheats", CheatsActive().ToString() } }, (json) =>
             {

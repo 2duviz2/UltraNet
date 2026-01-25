@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Jaket.Sam;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
@@ -29,6 +30,8 @@ namespace UltraNet.Canvas
         public GameObject buttonPrefab;
         public GameObject inputFieldPrefab;
 
+        AudioSource source = null;
+
         public const string mainUrl = "https://duviz.xyz/login";
         public const string errorJson = @"
             {
@@ -56,6 +59,11 @@ namespace UltraNet.Canvas
         {
             transform.GetChild(1).GetComponent<Animator>().updateMode = AnimatorUpdateMode.UnscaledTime;
             PostWebsite(mainUrl, new Dictionary<string, string> { { "token", GetToken() } });
+
+            source = new GameObject("Audio").AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.volume = 1f;
+            DontDestroyOnLoad(source.gameObject);
         }
 
         public void Update()
@@ -78,6 +86,15 @@ namespace UltraNet.Canvas
             {
                 lastJson = "";
                 PostWebsite(mainUrl, new Dictionary<string, string> { { "token", GetToken() } });
+            }
+            else
+            {
+                if (titleText.text.Contains("CHAT"))
+                {
+                    string lj = lastJson;
+                    lastJson = "";
+                    ParseJson(lj);
+                }
             }
         }
 
@@ -116,15 +133,18 @@ namespace UltraNet.Canvas
                 }
                 else
                 {
-                    ParseJson(errorJson);
+                    if (deletePrev)
+                        ParseJson(errorJson);
                 }
             }));
         }
 
+        string lastTTS = "";
         public void ParseJson(string json)
         {
             if (lastJson == json) return;
             if (!gameObject.activeInHierarchy) NotificationListener.Show();
+            string lastTitle = titleText.text;
             CleanUp();
 
             JObject root;
@@ -146,6 +166,15 @@ namespace UltraNet.Canvas
                 string cookieKey = root["cookieKey"]?.ToString() ?? "Element";
                 string cookieValue = root["cookieValue"]?.ToString() ?? "Element";
                 PlayerPrefs.SetString(cookieKey, cookieValue);
+            }
+
+            if (root["tts"] != null)
+            {
+                if (lastTTS != root["tts"].ToString())
+                {
+                    lastTTS = root["tts"].ToString();
+                    SamAPI.TryPlay(root["tts"].ToString(), source);
+                }
             }
 
 
