@@ -24,7 +24,7 @@ namespace UltraNet.Canvas
                 r3.sizeDelta = r.sizeDelta - Vector2.one * 50;
             }
             image.color = Color.black;
-            StartCoroutine(GetTextureFromURL(imageUrl, tex =>
+            Plugin.instance.StartCoroutine(GetTextureFromURL(imageUrl, tex =>
             {
                 if (tex != null)
                 {
