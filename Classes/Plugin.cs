@@ -49,6 +49,7 @@ public class Plugin : BaseUnityPlugin
         DontDestroyOnLoad(playerFetcher);
 
         openedOnce = PlayerPrefs.GetInt("UltraNet_Opened", 0) == 1;
+        Application.runInBackground = true;
     }
 
     public void Update()
@@ -94,5 +95,5 @@ public class PluginInfo
 {
     public const string GUID = "duviz.UltraNet";
     public const string Name = "UltraNet";
-    public const string Version = "0.0.4";
+    public const string Version = "0.0.5";
 }

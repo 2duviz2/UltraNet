@@ -25,26 +25,26 @@ namespace UltraNet.Classes
             lastCheats = cheats;
         }
 
-        public void CreateName(string text, string id)
+        public void CreateName(string text, string id, string url)
         {
             GameObject playerName = Instantiate(BundlesManager.netBundle.LoadAsset<GameObject>("PlayerName"));
             playerName.transform.localScale = new Vector3(-0.5f, 0.5f, 1);
             playerName.transform.SetParent(transform, false);
-            playerName.GetComponentInChildren<TMP_Text>().text = text;
+            playerName.GetComponentInChildren<TMP_Text>().text = TextParser.Parse(text);
             t = playerName.GetComponentInChildren<TMP_Text>();
-            originalText = text;
+            originalText = TextParser.Parse(text);
 
-            GetPfp(id, playerName);
+            GetPfp(id, playerName, url);
         }
 
-        public async void GetPfp(string id, GameObject obj)
+        public async void GetPfp(string id, GameObject obj, string url)
         {
-            SteamAvatarFetcher fetcher = new SteamAvatarFetcher();
-            string avatarUrl = await fetcher.GetSteamAvatarURL(id);
+            /*SteamAvatarFetcher fetcher = new SteamAvatarFetcher();
+            string avatarUrl = await fetcher.GetSteamAvatarURL(id);*/
 
-            if (!string.IsNullOrEmpty(avatarUrl))
+            if (!string.IsNullOrEmpty(url))
             {
-                obj.GetComponentInChildren<ImageGetter>().imageUrl = avatarUrl;
+                obj.GetComponentInChildren<ImageGetter>().imageUrl = url;
                 obj.GetComponentInChildren<ImageGetter>().SetImg();
             }
         }

@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -33,10 +35,20 @@ namespace UltraNet.Canvas
         }
 
         public static bool _loaded = true;
+        public static List<(string, Texture2D)> cachedPngs = [];
         public static IEnumerator GetTextureFromURL(string url, System.Action<Texture2D> callback)
         {
             //while (!_loaded) yield return null;
             _loaded = false;
+
+            (string, Texture2D) cached = cachedPngs.FirstOrDefault(x => x.Item1 == url);
+
+            if (cached.Item2 != null)
+            {
+                callback(cached.Item2);
+                yield break;
+            }
+
             using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(url))
             {
                 yield return uwr.SendWebRequest();
@@ -50,8 +62,10 @@ namespace UltraNet.Canvas
                 else
                 {
                     Texture2D tex = DownloadHandlerTexture.GetContent(uwr);
+                    tex.filterMode = FilterMode.Point;
                     callback?.Invoke(tex);
                     _loaded = true;
+                    cachedPngs.Add((url, tex));
                 }
             }
         }

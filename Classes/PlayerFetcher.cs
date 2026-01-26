@@ -51,7 +51,7 @@ namespace UltraNet.Classes
             }));
         }
 
-        public GameObject CreatePlayer(string id, Vector3 pos, string name)
+        public GameObject CreatePlayer(string id, Vector3 pos, string name, string url)
         {
             GameObject plr = /*GameObject.CreatePrimitive(PrimitiveType.Sphere);*/ new GameObject("Player viewer");
             /*Destroy(plr.GetComponent<Collider>());
@@ -59,7 +59,7 @@ namespace UltraNet.Classes
             r.material = new Material(DefaultReferenceManager.Instance.masterShader);*/
             plr.transform.position = pos;
             UltraNet.Classes.Player p = plr.AddComponent<UltraNet.Classes.Player>();
-            p.CreateName(name, id);
+            p.CreateName(name, id, url);
             players.Add(id, plr);
             return plr;
         }
@@ -90,6 +90,7 @@ namespace UltraNet.Classes
                 JObject player = (JObject)prop.Value;
                 string positionString = player["position"]?.ToString();
                 string playerName = player["name"]?.ToString();
+                string playerUrl = player["pfp"]?.ToString();
                 string cheatsString = player["cheats"].ToString();
                 bool cheats = cheatsString.ToLower() == "true";
                 Vector3 position = ParseVector3(positionString);
@@ -98,7 +99,7 @@ namespace UltraNet.Classes
                 iteratedPlayers.Add(id);
 
                 if (foundPlayer == null)
-                    foundPlayer = CreatePlayer(id, position, playerName);
+                    foundPlayer = CreatePlayer(id, position, playerName, playerUrl);
                 foundPlayer.GetComponent<UltraNet.Classes.Player>().SetTarget(position, cheats);
             }
 

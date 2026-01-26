@@ -29,6 +29,7 @@ namespace UltraNet.Canvas
         public GameObject imagePrefab;
         public GameObject buttonPrefab;
         public GameObject inputFieldPrefab;
+        public GameObject playerPrefab;
 
         AudioSource source = null;
 
@@ -195,6 +196,7 @@ namespace UltraNet.Canvas
                     "image" => imagePrefab,
                     "button" => buttonPrefab,
                     "inputField" => inputFieldPrefab,
+                    "player" => playerPrefab,
                     _ => null
                 };
                 if (prefab == null)
@@ -232,7 +234,7 @@ namespace UltraNet.Canvas
                         if (textComp != null)
 
                         {
-                            textComp.text = element["text"]?.ToString() ?? "Text";
+                            textComp.text = TextParser.Parse(element["text"]?.ToString()) ?? "Text";
                             if (element["color"] != null)
                                 textComp.color = ParseColor(element["color"]?.ToString());
                             textComp.alignment = element["alignment"] != null ? (TextAlignmentOptions)Enum.Parse(typeof(TextAlignmentOptions), element["alignment"].ToString()) : TextAlignmentOptions.Center;
@@ -252,7 +254,7 @@ namespace UltraNet.Canvas
                         var buttonTextComp = obj.GetComponentInChildren<TMP_Text>();
                         if (buttonTextComp != null)
                         {
-                            buttonTextComp.text = element["text"]?.ToString() ?? "Button";
+                            buttonTextComp.text = TextParser.Parse(element["text"]?.ToString()) ?? "Button";
                             buttonTextComp.alignment = element["alignment"] != null ? (TextAlignmentOptions)Enum.Parse(typeof(TextAlignmentOptions), element["alignment"].ToString()) : TextAlignmentOptions.Center;
                             if (element["color"] != null)
                                 buttonTextComp.color = ParseColor(element["color"]?.ToString());
@@ -289,7 +291,7 @@ namespace UltraNet.Canvas
                                             if (inputField != null)
                                             {
                                                 PlayerPrefs.SetString("Ultranet_InputField_" + inputFieldName, "");
-                                                PostWebsite(url, new Dictionary<string, string> { { "input", inputField.text }, { "token", GetToken() }, { "position", GetPosition() }, { "level", SceneHelper.CurrentScene } }, reload);
+                                                PostWebsite(url, new Dictionary<string, string> { { "input", inputField.text }, { "token", GetToken() }, { "position", GetPosition() }, { "level", SceneHelper.CurrentScene }, { "version", PluginInfo.Version } }, reload);
                                             }
                                             else
                                             {
@@ -298,7 +300,7 @@ namespace UltraNet.Canvas
                                         }
                                         break;
                                     case "postToken":
-                                        PostWebsite(url, new Dictionary<string, string> { { "token", GetToken() }, { "level", SceneHelper.CurrentScene } }, reload);
+                                        PostWebsite(url, new Dictionary<string, string> { { "token", GetToken() }, { "level", SceneHelper.CurrentScene }, { "version", PluginInfo.Version } }, reload);
                                         break;
                                     case "open":
                                         Application.OpenURL(url);
@@ -319,7 +321,7 @@ namespace UltraNet.Canvas
                         {
                             inputFieldComp.GetComponent<RectTransform>().sizeDelta = obj.GetComponent<RectTransform>().sizeDelta - Vector2.one * 10;
                             inputFieldComp.gameObject.AddComponent<GayInputField>();
-                            inputFieldComp.placeholder.GetComponent<TMP_Text>().text = element["text"]?.ToString() ?? "Enter text...";
+                            inputFieldComp.placeholder.GetComponent<TMP_Text>().text = TextParser.Parse(element["text"]?.ToString()) ?? "Enter text...";
                             inputFields.Add((obj.name, inputFieldComp));
                             if (element["saveValue"] != null)
                             {
@@ -348,6 +350,40 @@ namespace UltraNet.Canvas
                             {
                                 inputFieldComp.Select();
                             }
+                        }
+                        break;
+                    case "player":
+                        var playerButtonComp = obj.GetComponentInChildren<Button>();
+                        var playerButtonTextComp = obj.GetComponentInChildren<TMP_Text>();
+                        if (playerButtonComp != null)
+                        {
+                            playerButtonTextComp.text = TextParser.Parse(element["text"]?.ToString()) ?? "Button";
+                            playerButtonTextComp.alignment = element["alignment"] != null ? (TextAlignmentOptions)Enum.Parse(typeof(TextAlignmentOptions), element["alignment"].ToString()) : TextAlignmentOptions.Center;
+                            if (element["color"] != null)
+                                playerButtonTextComp.color = ParseColor(element["color"]?.ToString());
+
+                            string url = element["url"]?.ToString();
+                            string action = element["action"]?.ToString();
+
+                            playerButtonComp.onClick.AddListener(() =>
+                            {
+                                switch (action)
+                                {
+                                    case "postToken":
+                                        PostWebsite(url, new Dictionary<string, string> { { "token", GetToken() }, { "level", SceneHelper.CurrentScene }, { "version", PluginInfo.Version } });
+                                        break;
+                                    default:
+                                        Plugin.LogWarning($"Unknown player button action: {action}");
+                                        break;
+                                }
+                            });
+                        }
+                        var playerImageComp = obj.transform.GetComponentInChildren<ImageGetter>();
+                        if (playerImageComp != null)
+                        {
+                            string imageUrl = element["imageUrl"]?.ToString();
+                            playerImageComp.imageUrl = imageUrl;
+                            playerImageComp.SetImg();
                         }
                         break;
                 }
