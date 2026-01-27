@@ -150,7 +150,6 @@ namespace UltraNet.Canvas
         public void ParseJson(string json)
         {
             if (lastJson == json) return;
-            if (!gameObject.activeInHierarchy) NotificationListener.Show();
             string lastTitle = titleText.text;
             CleanUp();
 
@@ -177,6 +176,7 @@ namespace UltraNet.Canvas
 
             if (root["tts"] != null)
             {
+                if (!gameObject.activeInHierarchy && lastTTS != root["tts"].ToString()) NotificationListener.Show();
                 if (lastTTS != root["tts"].ToString())
                 {
                     source.volume = PlayerPrefs.GetFloat("UltranetConfig_TTSVolume", 0.5f);
