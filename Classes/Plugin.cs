@@ -81,6 +81,12 @@ public class Plugin : BaseUnityPlugin
         return EventSystem.current != null && EventSystem.current.currentSelectedGameObject != null && EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null && EventSystem.current.currentSelectedGameObject.GetComponent<TMP_InputField>().isFocused && EventSystem.current.currentSelectedGameObject.activeInHierarchy;
     }
 
+    public void OnApplicationFocus(bool isFocused)
+    {
+        if (OptionsManager.Instance != null && SceneHelper.CurrentScene != "Main Menu" && !OptionsManager.Instance.paused)
+            OptionsManager.Instance.Pause();
+    }
+
     public static T Ass<T>(string path)
     {
         return Addressables.LoadAssetAsync<T>((object)path).WaitForCompletion();

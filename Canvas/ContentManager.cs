@@ -69,7 +69,8 @@ namespace UltraNet.Canvas
 
         public void Update()
         {
-            OptionsManager.Instance.Pause();
+            if (OptionsManager.Instance != null && SceneHelper.CurrentScene != "Main Menu" && !OptionsManager.Instance.paused)
+                OptionsManager.Instance.Pause();
             Time.timeScale = 0f;
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
@@ -77,7 +78,8 @@ namespace UltraNet.Canvas
             {
                 Time.timeScale = 1f;
                 gameObject.SetActive(false);
-                OptionsManager.Instance.UnPause();
+                if (OptionsManager.Instance != null && SceneHelper.CurrentScene != "Main Menu")
+                    OptionsManager.Instance.UnPause();
             }
 
             if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.R))
@@ -181,7 +183,7 @@ namespace UltraNet.Canvas
                 {
                     source.volume = PlayerPrefs.GetFloat("UltranetConfig_TTSVolume", 0.5f);
                     lastTTS = root["tts"].ToString();
-                    SamAPI.TryPlay(root["tts"].ToString(), source);
+                    SamAPI.TryPlay(TextParser.Parse(root["tts"].ToString()), source);
                 }
             }
 
