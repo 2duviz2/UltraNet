@@ -77,7 +77,7 @@ namespace UltraNet.Classes
                 return;
             }
 
-            foreach (var plr in players)
+            foreach (var plr in players.ToList())
             {
                 if (plr.Value == null)
                     players.Remove(plr.Key);
@@ -109,7 +109,7 @@ namespace UltraNet.Classes
                 DoEvent(id);
             }
 
-            foreach (var plr in players)
+            foreach (var plr in players.ToList())
             {
                 if (!iteratedPlayers.Contains(plr.Key))
                 {
