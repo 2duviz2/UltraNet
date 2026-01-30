@@ -12,12 +12,12 @@ namespace UltraNet.Classes
 {
     public class PlayerFetcher : MonoBehaviour
     {
-        string syncUrl = "https://duviz.xyz/ultranet/user/update";
-        float timer = 0;
+        public static PlayerFetcher instance;
+        public float syncTime = 0.3f;
 
         Dictionary<string, GameObject> players = [];
-
-        public float syncTime = 0.3f;
+        string syncUrl = "https://duviz.xyz/ultranet/user/update";
+        float timer = 0;
 
         public void Update()
         {

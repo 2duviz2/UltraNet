@@ -11,6 +11,7 @@ namespace UltraNet.Classes
     public class Numerators : MonoBehaviour
     {
         public static Numerators instance;
+        public static bool _busy = false;
 
         public void Start()
         {
@@ -21,7 +22,8 @@ namespace UltraNet.Classes
         {
             yield return new WaitForSecondsRealtime(time);
             if (button == null) yield break;
-            button.onClick.Invoke();
+            if (!_busy)
+                button.onClick.Invoke();
             StartCoroutine(TimerButton(button, time));
         }
 

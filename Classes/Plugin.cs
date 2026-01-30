@@ -23,7 +23,7 @@ public class Plugin : BaseUnityPlugin
 
     public void Awake()
     {
-        hideFlags = UnityEngine.HideFlags.HideAndDontSave;
+        hideFlags = HideFlags.HideAndDontSave;
         instance = this;
 
         new Harmony(PluginInfo.GUID).PatchAll();
@@ -38,6 +38,7 @@ public class Plugin : BaseUnityPlugin
 
         obj.AddComponent<BundlesManager>();
         playerFetcher.AddComponent<PlayerFetcher>();
+        playerFetcher.AddComponent<PlayerListener>();
         gameObject.AddComponent<Numerators>();
 
         GameObject notifications = Instantiate(BundlesManager.netBundle.LoadAsset<GameObject>("UltraNetNotifications"));

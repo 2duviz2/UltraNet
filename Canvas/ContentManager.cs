@@ -10,6 +10,7 @@ using System.Text;
 using TMPro;
 using UltraNet.Classes;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
@@ -109,11 +110,13 @@ namespace UltraNet.Canvas
 
         public void LoadWebsite(string url, bool deletePrev = true)
         {
+            Numerators._busy = true;
             if (deletePrev)
                 Numerators.instance.StopAllCoroutines();
             if (deletePrev) { CleanUp(); lastJson = null; }
             Numerators.instance.StartCoroutine(Numerators.GetStringFromUrl(url, (json) =>
             {
+                Numerators._busy = false;
                 if (json != null)
                 {
                     if (json == "?")
