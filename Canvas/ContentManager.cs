@@ -432,6 +432,8 @@ namespace UltraNet.Canvas
 
         public static string GetPosition()
         {
+            if (Camera.main == null)
+                return Vector3.zero.ToString();
             return Camera.main.transform.position.ToString();
             return NewMovement.Instance != null && NewMovement.Instance.activated ? NewMovement.Instance.transform.position.ToString() : "";
         }
