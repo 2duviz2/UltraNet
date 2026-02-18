@@ -11,6 +11,7 @@ namespace UltraNet.Classes
         public float lerpSpeed = 2f;
 
         Vector3 targetPos;
+        Vector3Lerp lerpPos;
         TMP_Text t;
         string originalText;
         bool lastCheats = false;
@@ -18,6 +19,7 @@ namespace UltraNet.Classes
         public void SetTarget(Vector3 newPos, bool cheats)
         {
             targetPos = newPos;
+            lerpPos.Set(newPos);
             if (lastCheats != cheats)
             {
                 t.text = cheats ? $"<size=0.5>(C)</size>{originalText}" : originalText;
@@ -39,9 +41,6 @@ namespace UltraNet.Classes
 
         public async void GetPfp(string id, GameObject obj, string url)
         {
-            /*SteamAvatarFetcher fetcher = new SteamAvatarFetcher();
-            string avatarUrl = await fetcher.GetSteamAvatarURL(id);*/
-
             if (!string.IsNullOrEmpty(url))
             {
                 obj.GetComponentInChildren<ImageGetter>().imageUrl = url;
@@ -51,12 +50,17 @@ namespace UltraNet.Classes
 
         public void Update()
         {
+            transform.position = lerpPos.Grab();
+            transform.LookAt(Camera.main != null ? Camera.main.transform.position : Vector3.zero);
+        }
+
+        [Obsolete("Smooth :c")]
+        public void Lerp()
+        {
             float distance = Vector3.Distance(transform.position, targetPos);
             float speed = distance * lerpSpeed;
             float t = Time.unscaledDeltaTime * speed;
             transform.position = Vector3.MoveTowards(transform.position, targetPos, t);
-            transform.LookAt(Camera.main != null ? Camera.main.transform.position : Vector3.zero);
-            //transform.position = Vector3.Lerp(transform.position, targetPos, t);
         }
     }
 }

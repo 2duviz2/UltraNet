@@ -8,6 +8,8 @@ using UltraNet.Classes;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
+using static UltraNet.Classes.CustomBindingsPoCPlugin;
 
 [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
 public class Plugin : BaseUnityPlugin
@@ -50,23 +52,20 @@ public class Plugin : BaseUnityPlugin
         DontDestroyOnLoad(playerFetcher);
 
         openedOnce = PlayerPrefs.GetInt("UltraNet_Opened", 0) == 1;
-        Application.runInBackground = true;
+
+        SceneManager.sceneLoaded += SceneLoadDelayed;
+    }
+
+    public void SceneLoadDelayed(Scene _, LoadSceneMode __) => SceneLoad(_, __);
+
+    public void SceneLoad(Scene _, LoadSceneMode __)
+    {
+        if (SceneHelper.CurrentScene == "Main Menu" && gameObject.GetComponent<InputListener>() == null)
+            gameObject.AddComponent<InputListener>();
     }
 
     public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            if (UIBusy())
-                return;
-            canvasInstance.SetActive(!canvasInstance.activeSelf);
-            if (!openedOnce)
-            {
-                PlayerPrefs.SetInt("UltraNet_Opened", 1);
-                openedOnce = true;
-            }
-        }
-
         if (NewMovement.Instance != null && !openedOnce)
         {
             if (lastPlayerActive != NewMovement.Instance.activated)
@@ -74,6 +73,18 @@ public class Plugin : BaseUnityPlugin
                 HudMessageReceiver.Instance.SendHudMessage("Press <color=#ff66cc>(T)</color> to open <color=#66ff66>UltraNet</color>");
             }
             lastPlayerActive = NewMovement.Instance.activated;
+        }
+    }
+
+    public void PressKey()
+    {
+        if (UIBusy())
+            return;
+        canvasInstance.SetActive(!canvasInstance.activeSelf);
+        if (!openedOnce)
+        {
+            PlayerPrefs.SetInt("UltraNet_Opened", 1);
+            openedOnce = true;
         }
     }
 
@@ -102,5 +113,5 @@ public class PluginInfo
 {
     public const string GUID = "duviz.UltraNet";
     public const string Name = "UltraNet";
-    public const string Version = "0.0.6";
+    public const string Version = "0.0.8";
 }

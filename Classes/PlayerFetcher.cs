@@ -2,18 +2,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using TMPro;
 using UltraNet.Canvas;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace UltraNet.Classes
 {
     public class PlayerFetcher : MonoBehaviour
     {
         public static PlayerFetcher instance;
-        public float syncTime = 0.3f;
+        public static float syncTime = 0.3f;
 
         Dictionary<string, GameObject> players = [];
         string syncUrl = "https://duviz.xyz/ultranet/user/update";
