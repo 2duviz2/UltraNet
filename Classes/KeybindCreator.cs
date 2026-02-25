@@ -102,11 +102,9 @@ public static class CustomBindingsPoCPlugin
     {
         private InputActionMap _actionMap;
 
-        public new void Awake()
+        public void Awake()
         {
-            base.Awake();
             _actionMap = InputManager.Instance.InputSource.Actions.asset.FindActionMap(InputMapName);
-
             SomeFirstAction = _actionMap.FindAction(SomeFirstActionName);
         }
 

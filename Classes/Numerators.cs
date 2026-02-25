@@ -31,7 +31,7 @@ namespace UltraNet.Classes
         {
             using (UnityWebRequest www = UnityWebRequest.Get(url))
             {
-                www.timeout = 5;
+                www.timeout = 10;
                 yield return www.SendWebRequest();
 
                 if (www.result != UnityWebRequest.Result.Success)
@@ -60,7 +60,7 @@ namespace UltraNet.Classes
             }
             using (UnityWebRequest www = UnityWebRequest.Post(url, form))
             {
-                www.timeout = 5;
+                www.timeout = 10;
                 yield return www.SendWebRequest();
                 if (www.result != UnityWebRequest.Result.Success)
                 {
