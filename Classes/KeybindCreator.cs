@@ -86,14 +86,16 @@ public static class CustomBindingsPoCPlugin
 
         private static void MergeInputActionAssets(InputActions ukInputActions)
         {
-            var jukeboxActionAssets = Resources.FindObjectsOfTypeAll(typeof(InputActionAsset));
-            if (jukeboxActionAssets.Length == 0)
-            {
-                Debug.LogError("Couldn't load InputActionAsset");
-                return;
-            }
+            var asset = ukInputActions.asset;
 
-            ukInputActions.asset.AddActionMap(ActionMap);
+            var wasEnabled = asset.enabled;
+            if (wasEnabled)
+                asset.Disable();
+
+            asset.AddActionMap(ActionMap);
+
+            if (wasEnabled)
+                asset.Enable();
         }
     }
 

@@ -56,9 +56,9 @@ public class Plugin : BaseUnityPlugin
         SceneManager.sceneLoaded += SceneLoadDelayed;
     }
 
-    public void SceneLoadDelayed(Scene _, LoadSceneMode __) => SceneLoad(_, __);
+    public void SceneLoadDelayed(Scene _, LoadSceneMode __) => Invoke(nameof(SceneLoad), 0.1f);
 
-    public void SceneLoad(Scene _, LoadSceneMode __)
+    public void SceneLoad()
     {
         if (SceneHelper.CurrentScene == "Main Menu" && gameObject.GetComponent<InputListener>() == null)
             gameObject.AddComponent<InputListener>();
