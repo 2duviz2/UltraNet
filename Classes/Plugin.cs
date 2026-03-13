@@ -3,12 +3,12 @@
 using BepInEx;
 using HarmonyLib;
 using TMPro;
-using UltraNet.Canvas;
 using UltraNet.Classes;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using static UltraNet.Classes.CustomBindingsPoCPlugin;
 
 [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
@@ -47,6 +47,7 @@ public class Plugin : BaseUnityPlugin
         canvasObject = BundlesManager.netBundle.LoadAsset<GameObject>("UltraNetCanvas");
         canvasInstance = Instantiate(canvasObject);
         canvasInstance.SetActive(false);
+        canvasInstance.GetComponent<CanvasScaler>().screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
 
         DontDestroyOnLoad(canvasInstance);
         DontDestroyOnLoad(playerFetcher);
@@ -113,5 +114,5 @@ public class PluginInfo
 {
     public const string GUID = "duviz.UltraNet";
     public const string Name = "UltraNet";
-    public const string Version = "0.0.10";
+    public const string Version = "0.0.11";
 }
