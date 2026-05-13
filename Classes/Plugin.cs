@@ -23,6 +23,8 @@ public class Plugin : BaseUnityPlugin
     bool lastPlayerActive = false;
     bool openedOnce = false;
 
+    public static TMP_SpriteAsset defaultSpriteAsset;
+
     public void Awake()
     {
         hideFlags = HideFlags.HideAndDontSave;
@@ -49,6 +51,7 @@ public class Plugin : BaseUnityPlugin
         canvasInstance.SetActive(false);
         canvasInstance.GetComponent<CanvasScaler>().screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
 
+        defaultSpriteAsset = BundlesManager.netBundle.LoadAsset<TMP_SpriteAsset>("ilovemen");
         DontDestroyOnLoad(canvasInstance);
         DontDestroyOnLoad(playerFetcher);
 
@@ -114,5 +117,5 @@ public class PluginInfo
 {
     public const string GUID = "duviz.UltraNet";
     public const string Name = "UltraNet";
-    public const string Version = "0.0.11";
+    public const string Version = "0.0.12";
 }

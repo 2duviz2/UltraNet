@@ -6,6 +6,12 @@ namespace UltraNet.Canvas
     {
         public static Dictionary<string, string> parses = new()
         {
+            { "//10", "/" },
+            { "//11", "\\" },
+            { "//12", ":" },
+            { "//13", ";" },
+            { "//14", "<noparse><</noparse>" },
+            { "//15", "<noparse>></noparse>" },
             { "//1", "'" },
             { "//2", "\"" },
             { "//3", "(" },
@@ -15,10 +21,7 @@ namespace UltraNet.Canvas
             { "//7", "@" },
             { "//8", "!" },
             { "//9", "#" },
-            { "//10", "/" },
-            { "//11", "\\" },
-            { "//12", ":" },
-            { "//13", ";" },
+            { ":drool:", "<sprite=0>" },
         };
 
         public static string Parse(string text)

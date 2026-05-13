@@ -243,6 +243,7 @@ namespace UltraNet.Canvas
                             if (element["color"] != null)
                                 textComp.color = ParseColor(element["color"]?.ToString());
                             textComp.alignment = element["alignment"] != null ? (TextAlignmentOptions)Enum.Parse(typeof(TextAlignmentOptions), element["alignment"].ToString()) : TextAlignmentOptions.Center;
+                            textComp.spriteAsset = Plugin.defaultSpriteAsset;
                         }
                         break;
                     case "image":
