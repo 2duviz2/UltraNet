@@ -56,6 +56,8 @@ namespace UltraNet.Canvas
                 loading = false;
                 notifications = NotificationParser.Parse(json);
 
+                notifications ??= [];
+
                 bool read = true;
 
                 foreach (var notification in notifications)

@@ -64,6 +64,7 @@ namespace UltraNet.Classes
                 yield return www.SendWebRequest();
                 if (www.result != UnityWebRequest.Result.Success)
                 {
+                    //Plugin.LogError($"Error: {www.error}");
                     if (!string.IsNullOrEmpty(www.error))
                         if (www.error.Contains("Unknown Error"))
                             callback?.Invoke("?");
@@ -73,6 +74,7 @@ namespace UltraNet.Classes
                 else
                 {
                     //Plugin.LogInfo($"Time taken: {Time.realtimeSinceStartup - startTime}. Time: {Time.realtimeSinceStartup}");
+                    //Plugin.LogInfo($"Response: {www.downloadHandler.text}");
                     callback?.Invoke(www.downloadHandler.text);
                 }
             }

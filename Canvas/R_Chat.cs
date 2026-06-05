@@ -111,8 +111,15 @@ public static class ChatParser
 {
     public static List<ChatMessage> Parse(string json)
     {
-        string wrapped = "{ \"messages\": " + json + "}";
-        ChatMessageList result = JsonUtility.FromJson<ChatMessageList>(wrapped);
-        return result.messages;
+        try
+        {
+            string wrapped = "{ \"messages\": " + json + "}";
+            ChatMessageList result = JsonUtility.FromJson<ChatMessageList>(wrapped);
+            return result.messages;
+        }
+        catch (Exception)
+        {
+            return [];
+        }
     }
 }

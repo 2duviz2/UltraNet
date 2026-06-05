@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class R_Requests : MonoBehaviour
 {
     public TMP_InputField ID;
+    public TMP_InputField Field;
 
     public Transform Container;
 
@@ -53,8 +54,14 @@ public class R_Requests : MonoBehaviour
                 LoadPfp(profile.id, item.transform.GetChild(0).GetChild(0).GetComponent<Image>());
                 item.transform.GetChild(1).GetComponent<TMP_InputField>().text = profile.name;
 
+                var profileB = item.transform.GetChild(0).gameObject;
                 var accept = item.transform.GetChild(2).gameObject;
                 var reject = item.transform.GetChild(3).gameObject;
+
+                profileB.GetComponent<Button>().onClick.AddListener(() =>
+                {
+                    R_DMs.OpenProfileStatic(profile.id);
+                });
 
                 accept.GetComponent<Button>().onClick.AddListener(() =>
                 {
@@ -86,6 +93,12 @@ public class R_Requests : MonoBehaviour
             var i = await SteamAvatarUtils.GetAvatarSpriteAsync(result);
             img.sprite = i;
         }
+    }
+
+    public void Search()
+    {
+        if (string.IsNullOrEmpty(Field.text)) return;
+        R_DMs.OpenProfileStatic(Field.text);
     }
 
     public void CopyID()

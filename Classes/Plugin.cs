@@ -38,14 +38,19 @@ public class Plugin : BaseUnityPlugin
 
     public void Start()
     {
-        GameObject obj = new GameObject("Managers");
-        GameObject playerFetcher = new GameObject("PlayerFetcher");
+        GameObject obj = new GameObject("Managers")
+        {
+            hideFlags = HideFlags.HideAndDontSave
+        };
+        GameObject playerFetcher = new GameObject("PlayerFetcher")
+        {
+            hideFlags = HideFlags.HideAndDontSave
+        };
 
         obj.AddComponent<BundlesManager>();
         obj.AddComponent<Numerators>();
         obj.AddComponent<InputListenerInstance>();
         playerFetcher.AddComponent<PlayerFetcher>();
-        playerFetcher.AddComponent<PlayerListener>();
 
         GameObject notifications = Instantiate(BundlesManager.netBundle.LoadAsset<GameObject>("UltraNetNotifications"));
         canvasObject = BundlesManager.netBundle.LoadAsset<GameObject>("UltraNetCanvas");
@@ -123,5 +128,5 @@ public class PluginInfo
 {
     public const string GUID = "duviz.UltraNet";
     public const string Name = "UltraNet";
-    public const string Version = "0.1.0";
+    public const string Version = "0.1.4";
 }

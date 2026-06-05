@@ -20,6 +20,7 @@ public class R_Profile : MonoBehaviour
     public Image Pfp;
     public GameObject ProfileSettings;
     public GameObject SendFriendRequestButton;
+    public GameObject RemoveFriendButton;
 
     bool loading = false;
 
@@ -49,6 +50,7 @@ public class R_Profile : MonoBehaviour
 
                 ProfileSettings.SetActive(p.id == ContentManager.steamid);
                 SendFriendRequestButton.SetActive(p.id != ContentManager.steamid && p.friends.ToLower() != "true");
+                RemoveFriendButton.SetActive(p.id != ContentManager.steamid && p.friends.ToLower() == "true");
             }
             else
             {
@@ -98,6 +100,12 @@ public class R_Profile : MonoBehaviour
         Numerators.instance.StartCoroutine(Numerators.PostRequest(ContentManager.sendFriendRequestUrl, new() { { "token", ContentManager.GetToken() }, { "steamid", id } }, (json) => {} ));
     }
 
+    public void RemoveFriend()
+    {
+        RemoveFriendButton.SetActive(false);
+        Numerators.instance.StartCoroutine(Numerators.PostRequest(ContentManager.setFriendsUrl, new() { { "token", ContentManager.GetToken() }, { "steamid", id }, { "status", "false" } }, (json) => { }));
+    }
+
     public async void LoadPfp(string steamid)
     {
         if (ulong.TryParse(steamid, out var result))
@@ -139,6 +147,7 @@ public class Profile
     public string status;
     public string friends;
     public string dms;
+    public string level;
 }
 
 [Serializable]

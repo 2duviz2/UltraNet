@@ -36,6 +36,12 @@ namespace UltraNet.Canvas
         {
             public string id;
             public GameObject prefab;
+
+            public R_Window(string id, GameObject prefab)
+            {
+                this.id = id;
+                this.prefab = prefab;
+            }
         }
 
         [Header("Prefabs")]
@@ -54,6 +60,28 @@ namespace UltraNet.Canvas
             source.playOnAwake = false;
             source.volume = 1f;
             DontDestroyOnLoad(source.gameObject);
+
+            print(windows.Count);
+            print(windows);
+            foreach (var w in windows)
+            {
+                Plugin.LogInfo($"Window: {w.id}, isnull: {w.prefab == null}");
+            }
+
+            if (windows.Count == 0) // idk why it happens
+            {
+                Plugin.LogWarning("Windows list is empty, loading from bundles...");
+
+                windows.Add(new("login", BundlesManager.netBundle.LoadAsset<GameObject>("Login Variant")));
+                windows.Add(new("main", BundlesManager.netBundle.LoadAsset<GameObject>("UltranetMain Variant")));
+                windows.Add(new("rules", BundlesManager.netBundle.LoadAsset<GameObject>("Rules Variant")));
+                windows.Add(new("chat", BundlesManager.netBundle.LoadAsset<GameObject>("Chat Variant")));
+                windows.Add(new("profile", BundlesManager.netBundle.LoadAsset<GameObject>("Profile Variant")));
+                windows.Add(new("profilesettings", BundlesManager.netBundle.LoadAsset<GameObject>("Profile Settings Variant")));
+                windows.Add(new("friends", BundlesManager.netBundle.LoadAsset<GameObject>("Friends Variant")));
+                windows.Add(new("requests", BundlesManager.netBundle.LoadAsset<GameObject>("FriendRequests Variant")));
+                windows.Add(new("friendChat", BundlesManager.netBundle.LoadAsset<GameObject>("Friend Chat Variant")));
+            }
         }
 
         bool checking = false;
@@ -62,6 +90,13 @@ namespace UltraNet.Canvas
             if (checking) return;
 
             checking = true;
+
+            if (GetToken() == "")
+            {
+                SpawnWindow("login");
+                checking = false;
+                return;
+            }
 
             Numerators.instance.StartCoroutine(Numerators.PostRequest(loginUrl, new() { { "token", GetToken() } }, (json) =>
             {
@@ -124,11 +159,21 @@ namespace UltraNet.Canvas
 
             if (w != null)
             {
-                if (openWindows.Contains(customID)) return null;
+                if (openWindows.Contains(customID))
+                {
+                    Plugin.LogError($"Window with id '{customID}' is already open!");
+                    return null;
+                }
+
+                Plugin.LogInfo($"Spawning window '{id}' with custom id '{customID}'");
 
                 var ww = Instantiate(w.prefab, transform);
                 ww.name = customID;
                 return ww;
+            }
+            else
+            {
+                Plugin.LogError($"No window with id '{id}' found!");
             }
 
             return null;

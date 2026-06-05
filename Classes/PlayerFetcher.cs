@@ -22,7 +22,7 @@ namespace UltraNet.Classes
 
             if (timer >= syncTime)
             {
-                if (SceneHelper.CurrentScene == "Main Menu" || NewMovement.Instance == null) return;
+                if (NewMovement.Instance == null) return;
                 timer = 0;
                 Sync();
             }

@@ -65,9 +65,11 @@ public class R_DMs : MonoBehaviour
             {
                 var p = profiles[0];
 
-                if (p.status.ToLower() == "online")
+                if (p.status.ToLower().Contains("online"))
                 {
                     Online.gameObject.SetActive(true);
+
+                    Title.text = $"{p.name}\n<color=#333333>{p.level}</color>";
                 }
                 else
                 {
@@ -118,6 +120,13 @@ public class R_DMs : MonoBehaviour
     }
 
     public void OpenProfile()
+    {
+        var window = ContentManager.instance.SpawnWindowCustomID("profile", $"profile.{id}");
+        var profile = window.GetComponent<R_Profile>();
+        profile.LoadProfile(id);
+    }
+
+    public static void OpenProfileStatic(string id)
     {
         var window = ContentManager.instance.SpawnWindowCustomID("profile", $"profile.{id}");
         var profile = window.GetComponent<R_Profile>();
