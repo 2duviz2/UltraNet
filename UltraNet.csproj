@@ -34,6 +34,11 @@
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 		<PackageReference Include="UnityEngine.Modules" Version="2022.3.29" IncludeAssets="compile" />
 
+        <PackageReference Include="Krafs.Publicizer" Version="2.3.0">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+      
 		<!-- Assemblies via Managed -->
 		<Reference Include="BepInEx">
 			<HintPath>$(CorePath)\BepInEx.dll</HintPath>
@@ -43,6 +48,8 @@
 		</Reference>
 		<Reference Include="Assembly-CSharp :3">
 			<HintPath>$(ManagedPath)\Assembly-CSharp.dll</HintPath>
+            <Private>false</Private>
+            <CopyLocal>false</CopyLocal>
 		</Reference>
 		<Reference Include="Plog meow">
 			<HintPath>$(ManagedPath)\plog.dll</HintPath>
@@ -65,7 +72,9 @@
       <Reference Include="Unity.InputSystem ^^">
         <HintPath>$(ManagedPath)\Unity.InputSystem.dll</HintPath>
       </Reference>
-	</ItemGroup>
+      
+      <Publicize Include="Assembly-CSharp" />
+    </ItemGroup>
 
 	<Target Name="PreBuild" BeforeTargets="Build">
 		<!-- Log an error if the ULTRAKILLPath isn't set as it's nessecary for building the mod. -->

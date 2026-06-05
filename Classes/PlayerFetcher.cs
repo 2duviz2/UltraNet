@@ -206,7 +206,7 @@ namespace UltraNet.Classes
             );
         }
 
-        public bool CheatsActive()
+        public static bool CheatsActive()
         {
             return CheatsController.Instance.cheatsEnabled || MonoSingleton<StatsManager>.Instance.majorUsed;
         }

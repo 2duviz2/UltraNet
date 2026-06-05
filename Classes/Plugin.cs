@@ -3,6 +3,7 @@
 using BepInEx;
 using HarmonyLib;
 using TMPro;
+using UltraNet.Canvas;
 using UltraNet.Classes;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -37,13 +38,14 @@ public class Plugin : BaseUnityPlugin
 
     public void Start()
     {
-        GameObject obj = new GameObject("BundlesManager");
+        GameObject obj = new GameObject("Managers");
         GameObject playerFetcher = new GameObject("PlayerFetcher");
 
         obj.AddComponent<BundlesManager>();
+        obj.AddComponent<Numerators>();
+        obj.AddComponent<InputListenerInstance>();
         playerFetcher.AddComponent<PlayerFetcher>();
         playerFetcher.AddComponent<PlayerListener>();
-        gameObject.AddComponent<Numerators>();
 
         GameObject notifications = Instantiate(BundlesManager.netBundle.LoadAsset<GameObject>("UltraNetNotifications"));
         canvasObject = BundlesManager.netBundle.LoadAsset<GameObject>("UltraNetCanvas");
@@ -54,6 +56,7 @@ public class Plugin : BaseUnityPlugin
         defaultSpriteAsset = BundlesManager.netBundle.LoadAsset<TMP_SpriteAsset>("ilovemen");
         DontDestroyOnLoad(canvasInstance);
         DontDestroyOnLoad(playerFetcher);
+        DontDestroyOnLoad(obj);
 
         openedOnce = PlayerPrefs.GetInt("UltraNet_Opened", 0) == 1;
 
@@ -85,6 +88,9 @@ public class Plugin : BaseUnityPlugin
         if (UIBusy())
             return;
         canvasInstance.SetActive(!canvasInstance.activeSelf);
+
+        if (canvasInstance.activeSelf) ContentManager.instance.Open();
+
         if (!openedOnce)
         {
             PlayerPrefs.SetInt("UltraNet_Opened", 1);
@@ -117,5 +123,5 @@ public class PluginInfo
 {
     public const string GUID = "duviz.UltraNet";
     public const string Name = "UltraNet";
-    public const string Version = "0.0.12";
+    public const string Version = "0.1.0";
 }

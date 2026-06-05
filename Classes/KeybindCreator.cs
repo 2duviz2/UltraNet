@@ -1,6 +1,7 @@
 ﻿namespace UltraNet.Classes;
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using BepInEx;
@@ -54,11 +55,11 @@ public static class CustomBindingsPoCPlugin
 
     public class InputListener : MonoBehaviour
     {
-        private Inputs inputs;
+        private InputListenerInstance inputs;
 
         public void Start()
         {
-            inputs = Inputs.Instance;
+            inputs = InputListenerInstance.Instance;
         }
 
         public void Update()
@@ -99,13 +100,21 @@ public static class CustomBindingsPoCPlugin
         }
     }
 
-    [ConfigureSingleton(SingletonFlags.PersistAutoInstance)]
-    public class Inputs : MonoSingleton<Inputs>
+    public class InputListenerInstance : MonoBehaviour
     {
+        public static InputListenerInstance Instance;
+
         private InputActionMap _actionMap;
 
         public void Awake()
         {
+            Instance = this;
+            StartCoroutine(WaitForIt());
+        }
+
+        public IEnumerator WaitForIt()
+        {
+            while (InputManager.Instance == null) yield return null;
             _actionMap = InputManager.Instance.InputSource.Actions.asset.FindActionMap(InputMapName);
             SomeFirstAction = _actionMap.FindAction(SomeFirstActionName);
         }
