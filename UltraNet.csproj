@@ -21,10 +21,6 @@
 	</PropertyGroup>
 	
 	<ItemGroup>
-	  <None Remove="Assets\ultranet.bundle" />
-	</ItemGroup>
-	
-	<ItemGroup>
 	  <EmbeddedResource Include="Assets\ultranet.bundle" />
 	</ItemGroup>
 
@@ -75,6 +71,10 @@
       
       <Publicize Include="Assembly-CSharp" />
     </ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Assets\" />
+	</ItemGroup>
 
 	<Target Name="PreBuild" BeforeTargets="Build">
 		<!-- Log an error if the ULTRAKILLPath isn't set as it's nessecary for building the mod. -->
